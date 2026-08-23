@@ -16,9 +16,17 @@ function resolveDbUrl() {
 }
 
 async function createClient() {
-  const { PrismaLibSql } = await import('@prisma/adapter-libsql');
   const url = resolveDbUrl();
   console.log(`  📂 Database: ${url}`);
+
+  const isPostgres = url.startsWith('postgresql://') || url.startsWith('postgres://');
+  if (isPostgres) {
+    const { PrismaPg } = await import('@prisma/adapter-pg');
+    const adapter = new PrismaPg({ connectionString: url });
+    return new PrismaClient({ adapter });
+  }
+
+  const { PrismaLibSql } = await import('@prisma/adapter-libsql');
   const adapter = new PrismaLibSql({ url });
   return new PrismaClient({ adapter });
 }
