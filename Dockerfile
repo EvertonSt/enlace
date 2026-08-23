@@ -51,11 +51,6 @@ COPY apps/server/prisma.config.ts ./apps/server/prisma.config.ts
 COPY apps/server/scripts/start.sh ./start.sh
 RUN chmod +x ./start.sh
 
-# Generate Prisma client for production
-RUN cd apps/server && DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
-# Copy generated client to where the compiled dist/ code expects it
-RUN cp -r apps/server/src/generated apps/server/dist/generated
-
 ENV NODE_ENV=production
 ENV PORT=3001
 ENV HOST=0.0.0.0
