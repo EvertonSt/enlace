@@ -1,5 +1,6 @@
 import { PrismaClient } from '../generated/prisma/client.js';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
+import { PrismaPg } from '@prisma/adapter-pg';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -12,14 +13,13 @@ export function getPrisma(): PrismaClient {
   const isPostgres = rawUrl?.startsWith('postgresql://') || rawUrl?.startsWith('postgres://');
 
   if (isPostgres && rawUrl) {
-    const { PrismaPg } = require('@prisma/adapter-pg') as typeof import('@prisma/adapter-pg');
     const adapter = new PrismaPg({ connectionString: rawUrl });
     _prisma = new PrismaClient({ adapter });
   } else {
     // Resolve SQLite path to absolute (prisma/dev.db relative to server root)
     const here = path.dirname(fileURLToPath(import.meta.url));
     const serverRoot = path.resolve(here, '..', '..');
-    const dbPath = path.resolve(serverRoot, 'prisma', 'dev.db').replace(/\\/g, '/');
+    const dbPath = path.resolve(serverRoot, 'prisma', 'dev.db').replace(/\\\\/g, '/');
     const url = `file:${dbPath}`;
     const adapter = new PrismaLibSql({ url });
     _prisma = new PrismaClient({ adapter });
