@@ -51,6 +51,11 @@ COPY apps/server/prisma.config.ts ./apps/server/prisma.config.ts
 COPY apps/server/scripts/start.sh ./start.sh
 RUN chmod +x ./start.sh
 
+# Generate Prisma client (installs runtime deps + creates .js files)
+RUN cd apps/server && DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
+# Copy generated client to where compiled dist/ code expects it
+RUN mkdir -p apps/server/dist/generated && cp -a apps/server/src/generated/prisma/. apps/server/dist/generated/prisma/
+
 ENV NODE_ENV=production
 ENV PORT=3001
 ENV HOST=0.0.0.0
