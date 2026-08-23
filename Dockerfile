@@ -48,6 +48,8 @@ COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/packages/core/dist ./packages/core/dist
 COPY --from=prisma /app/apps/server/src/generated ./apps/server/src/generated
 COPY apps/server/prisma/schema.prisma ./apps/server/prisma/
+COPY apps/server/scripts/start.sh ./start.sh
+RUN chmod +x ./start.sh
 
 ENV NODE_ENV=production
 ENV PORT=3001
@@ -55,4 +57,4 @@ ENV HOST=0.0.0.0
 
 EXPOSE 3001
 
-CMD ["node", "apps/server/dist/index.js"]
+CMD ["./start.sh"]
