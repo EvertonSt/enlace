@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("customer")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer Customer?
+}
+
+model Plan {
+  id         String   @id @default(uuid())
+  name       String
+  speedMbps  Int
+  dataCapGb  Int?
+  price      Decimal
+  currency   String   @default("BRL")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customers Customer[]
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  name      String
+  email     String   @unique
+  phone     String?
+  address   String?
+  planId    String
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id])
+  plan     Plan     @relation(fields: [planId], references: [id])
+  tickets  Ticket[]
+  invoices Invoice[]
+}
+
+model Ticket {
+  id         String   @id @default(uuid())
+  customerId String
+  subject    String
+  body       String
+  status     String   @default("open")
+  priority   String   @default("medium")
+  category   String   @default("other")
+  assignedTo String?
+  aiTriage   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customer      Customer         @relation(fields: [customerId], references: [id])
+  technicianJob TechnicianJob?
+}
+
+model OutageEvent {
+  id                    String   @id @default(uuid())
+  title                 String
+  description           String?
+  status                String   @default("reported")
+  affectedArea          String
+  affectedCustomerCount Int      @default(0)
+  startedAt             DateTime
+  estimatedResolution   DateTime?
+  resolvedAt            DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Invoice {
+  id         String   @id @default(uuid())
+  customerId String
+  amount     Decimal
+  currency   String   @default("BRL")
+  dueDate    DateTime
+  status     String   @default("pending")
+  lineItems  String
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
+model Technician {
+  id            String   @id @default(uuid())
+  name          String
+  phone         String?
+  email         String?  @unique
+  area          String
+  status        String   @default("available")
+  rating        Float    @default(4.0)
+  completedToday Int     @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  jobs TechnicianJob[]
+}
+
+model TechnicianJob {
+  id           String   @id @default(uuid())
+  ticketId     String   @unique
+  technicianId String
+  status       String   @default("assigned")
+  scheduledAt  DateTime
+  startedAt    DateTime?
+  completedAt  DateTime?
+  notes        String?
+  location     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ticket     Ticket     @relation(fields: [ticketId], references: [id])
+  technician Technician @relation(fields: [technicianId], references: [id])
+}

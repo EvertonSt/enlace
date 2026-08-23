@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "6a0d844f-da3d-44f2-97a6-9fddea9b9e62"
+      }
+    },
+    "android": {
+      "package": "com.evertonqa.enlace"
+    }
+  }
+}

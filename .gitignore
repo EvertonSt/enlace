@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+.astro/
+src/generated/
+apps/server/prisma/dev.db
+
+# Tauri
+target/
+
+# Expo
+.expo/
+android/
+ios/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+
+# Misc
+*.tsbuildinfo
+TURBO_CACHE_DIR/
+.vercel/
+.enlace/
+*.aab
+*.apk
+enlace/

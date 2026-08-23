@@ -1,0 +1,885 @@
+================================================================================
+ENLACE — ISP Customer & Network Operations Suite
+Complete Project Documentation
+================================================================================
+
+Table of Contents
+-----------------
+  1. Project Overview
+  2. Monorepo Architecture
+  3. App-by-App Breakdown
+     3a. Mobile App (React Native / Expo)
+     3b. Web App (React / Vite / Tailwind)
+     3c. Desktop App (Tauri / React / Vite)
+     3d. Server (Fastify / Prisma / PostgreSQL)
+     3e. Core Package (Shared types, schemas, API client)
+  4. How Everything Connects
+  5. Environment Variables Reference
+  6. Local Development Setup
+  7. Database Setup, Seeding & Route Implementation
+  8. Deployment Instructions
+     8a. Push to GitHub
+     8b. Deploy Web to Netlify or Vercel
+     8c. Deploy Server (Railway / Render / Fly.io)
+     8d. Build & Publish Mobile (EAS / Google Play / App Store)
+     8e. Build Desktop (Tauri)
+  9. API Reference
+ 10. What Was Done Today (Session Log)
+
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+Enlace is a full-stack ISP (Internet Service Provider) management platform
+designed for small-to-medium fiber ISPs in Brazil. It provides:
+
+  • A customer-facing mobile app (iOS/Android) for checking plans, bills,
+    outages, and support tickets.
+  • A customer-facing web portal with the same features.
+  • A NOC (Network Operations Center) desktop app for internal staff to
+    manage outages, dispatch technicians, and handle support queues.
+  • A backend API server with AI-powered ticket triage (Claude, OpenAI,
+    or rule-based fallback).
+
+The entire platform is built as a TypeScript monorepo managed by pnpm
+workspaces and Turborepo.
+
+
+================================================================================
+2. MONOREPO ARCHITECTURE
+================================================================================
+
+enlace/
+├── apps/
+│   ├── mobile/          # React Native (Expo SDK 53) — customer mobile app
+│   ├── web/             # React + Vite + Tailwind — customer web portal
+│   ├── desktop/         # Tauri + React + Vite — NOC desktop app
+│   └── server/          # Fastify + Prisma + PostgreSQL — API server
+├── packages/
+│   ├── core/            # Shared TypeScript types, Zod schemas, API client
+│   └── config/          # Shared ESLint, Prettier, TypeScript configs
+├── package.json         # Root workspace config
+├── pnpm-workspace.yaml  # pnpm workspace definition
+├── pnpm-lock.yaml       # Lockfile
+├── turbo.json           # Turborepo task definitions
+└── .npmrc               # shamefully-hoist=true (required for React Native)
+
+Key technologies:
+  • Package manager: pnpm 9.15.5
+  • Build orchestration: Turborepo 2.10
+  • Language: TypeScript 5.9
+  • Mobile: Expo SDK 53, React Native 0.79
+  • Web/Desktop: React 19, Vite 6
+  • Desktop shell: Tauri 2 (Rust)
+  • Server: Fastify 5, Prisma 7 (PostgreSQL)
+  • AI: Anthropic Claude, OpenAI, rule-based fallback
+
+
+================================================================================
+3. APP-BY-APP BREAKDOWN
+================================================================================
+
+--------------------------------------------------------------------------------
+3a. MOBILE APP (apps/mobile)
+--------------------------------------------------------------------------------
+
+Platform:   React Native via Expo SDK 53
+Entry:      expo-router/entry (file-based routing in app/ directory)
+Package:    @enlace/mobile
+
+Screens:
+  • index.tsx        — Login screen (email + password, demo mode)
+  • dashboard.tsx    — Customer dashboard (plan info, data usage, next bill,
+                       active outages)
+  • outages.tsx      — Outage map view with status legend and affected areas
+  • tickets.tsx      — Support tickets list + create-ticket form
+  • billing.tsx      — Invoice history and current bill breakdown
+
+Features implemented today:
+  • Custom purple globe app icon (1024x1024 PNG)
+  • Android adaptive icon with transparent foreground
+  • Custom splash screen logo (200x200)
+  • Animated splash screen (expo-splash-screen):
+      - Spring-animated logo scale-up
+      - 360° globe rotation
+      - Text fade-in for "E" and "ENLACE"
+      - 400ms hold, then unmounts
+  • Haptic feedback (expo-haptics) on every tab switch
+  • Pull-to-refresh on all 4 data screens (Dashboard, Outages, Tickets,
+    Billing) using shared useRefresh hook
+  • Dark/light theme support throughout
+  • i18n (English + Brazilian Portuguese) via i18next + expo-secure-store
+    for language persistence
+  • Tab-based navigation (expo-router Tabs)
+
+EAS Build:
+  • Production AAB built successfully via EAS Build
+  • Project ID: 05008d84-ea1d-4a68-920a-de42f5a16184
+  • Owner account: evertonst
+
+Key dependencies:
+  expo ~53.0.0, expo-router ~5.0.0, expo-splash-screen ~0.30.0,
+  expo-haptics ~14.1.0, expo-secure-store ~14.2.0,
+  react-native ~0.79.0, i18next, react-i18next
+
+--------------------------------------------------------------------------------
+3b. WEB APP (apps/web)
+--------------------------------------------------------------------------------
+
+Platform:   React 19 + Vite 6 + Tailwind CSS 3
+Package:    @enlace/web
+
+Pages:
+  • LoginPage.tsx          — Login with email/password
+  • DashboardPage.tsx      — Plan details, usage, next bill
+  • OutagesPage.tsx        — Outage map (Leaflet + react-leaflet)
+  • TicketsPage.tsx        — Ticket list and creation
+  • BillingPage.tsx        — Invoice history and payment status
+  • SpeedTestPage.tsx      — Speed test UI
+
+Features:
+  • React Router v7 for client-side routing
+  • Framer Motion for page transitions
+  • Leaflet map for outage visualization
+  • Dark/light theme toggle
+  • Language toggle (EN/PT-BR)
+  • Sonner for toast notifications
+  • Responsive layout with Tailwind CSS
+  • i18n via i18next
+
+Build output: dist/ (~723KB JS, ~33KB CSS)
+
+Key dependencies:
+  react 19, react-router-dom 7, framer-motion 13, leaflet 1.9,
+  react-leaflet 5, tailwindcss 3, i18next, sonner
+
+--------------------------------------------------------------------------------
+3c. DESKTOP APP (apps/desktop)
+--------------------------------------------------------------------------------
+
+Platform:   Tauri 2 (Rust backend) + React 19 + Vite 6
+Package:    @enlace/desktop
+
+Pages:
+  • NocDashboard.tsx     — NOC overview: active incidents, system health
+  • SupportQueue.tsx     — Ticket queue with filtering and assignment
+  • CustomerLookup.tsx   — Customer search and detail view
+  • TechDispatch.tsx     — Technician job assignment and tracking
+
+Features:
+  • Native desktop app via Tauri (cross-platform: Windows, macOS, Linux)
+  • Tauri plugins: notification (desktop alerts), store (local persistence)
+  • React Router for navigation
+  • Framer Motion for animations
+  • Sonner for toast notifications
+  • Dark/light theme toggle
+  • i18n via i18next
+
+Build: tauri build produces native installers (.msi, .dmg, .deb)
+
+Key dependencies:
+  @tauri-apps/plugin-notification 2, @tauri-apps/plugin-store 2,
+  @tauri-apps/cli 2, react 19, react-router-dom 7, framer-motion 13
+
+--------------------------------------------------------------------------------
+3d. SERVER (apps/server)
+--------------------------------------------------------------------------------
+
+Platform:   Fastify 5 + Prisma 7 + PostgreSQL
+Package:    @enlace/server
+
+API Routes (all under /api prefix):
+  • POST /api/auth/register   — Register new customer account
+  • POST /api/auth/login      — Login, returns JWT token
+  • GET  /api/auth/me         — Get current user info (authenticated)
+  • GET  /api/tickets         — List tickets (customers see own, staff see all)
+  • GET  /api/tickets/:id     — Get ticket details
+  • POST /api/tickets         — Create ticket + AI triage
+  • PATCH /api/tickets/:id    — Update ticket status/priority
+  • GET  /api/tickets/:id/triage — Get AI triage result for a ticket
+  • GET  /api/outages         — List all outage events
+  • GET  /api/outages/:id     — Get outage details
+  • POST /api/outages         — Create outage (authenticated)
+  • PATCH /api/outages/:id    — Update outage status
+  • GET  /api/customers       — Customer endpoints (in routes/customers.ts)
+  • GET  /api/invoices        — Invoice endpoints (in routes/invoices.ts)
+  • GET  /api/plans           — Plan endpoints (in routes/plans.ts)
+  • GET  /api/health          — Health check (no auth)
+
+AI Triage System:
+  • Supports 3 providers: Claude (Anthropic), OpenAI, rule-based
+  • Configured via TRIAGE_PROVIDER env var
+  • Automatic fallback: if primary provider fails, falls back to rule-based
+  • 15-second timeout per triage call
+  • Returns: urgency score (1-5), category, suggested response, provider info
+
+Authentication:
+  • JWT tokens (7-day expiry)
+  • bcrypt password hashing (12 rounds)
+  • Fastify preHandler middleware for protected routes
+  • Role-based access: customer (own data only), staff (all data), admin
+
+Database Models (Prisma schema):
+  • User — email, password (hashed), name, role (customer/staff/admin)
+  • Plan — name, speed (Mbps), data cap (GB), price (BRL)
+  • Customer — linked to User + Plan, has phone, address, status
+  • Ticket — subject, body, status, priority, category, aiTriage (JSON)
+  • OutageEvent — title, description, status, affected area/count, times
+  • Invoice — amount, due date, status, lineItems (JSON)
+  • TechnicianJob — linked to Ticket, status, schedule, notes, location
+
+--------------------------------------------------------------------------------
+3e. CORE PACKAGE (packages/core)
+--------------------------------------------------------------------------------
+
+Package: @enlace/core — shared across ALL apps
+
+Exports:
+  • Zod schemas & TypeScript types for every domain entity:
+      Customer, Plan, Ticket, OutageEvent, Invoice, TechnicianJob
+  • Status/priority/category enums
+  • AI triage result schema
+  • CreateTicketRequest schema (used for validation on both client & server)
+  • Typed API client (apiFetch, api.get/post/put/patch/delete)
+  • configureApiClient() to set base URL and token provider
+  • i18n resources (en.json, pt-BR.json)
+
+This package is the single source of truth. When the server returns a Ticket,
+the TypeScript type is shared with the mobile, web, and desktop apps — no
+code duplication, no type mismatches.
+
+
+================================================================================
+4. HOW EVERYTHING CONNECTS
+================================================================================
+
+                    ┌──────────────┐
+                    │   Database   │
+                    │  PostgreSQL  │
+                    └──────┬───────┘
+                           │ Prisma ORM
+                    ┌──────┴───────┐
+                    │    Server    │
+                    │   Fastify    │
+                    │  :3001       │
+                    └──┬─────┬──┬──┘
+                       │     │  │
+            ┌──────────┘     │  └──────────┐
+            │                │             │
+     ┌──────┴──────┐  ┌─────┴─────┐  ┌────┴─────┐
+     │  Web App    │  │  Mobile   │  │ Desktop  │
+     │  (Vite)     │  │  (Expo)   │  │ (Tauri)  │
+     │  :5173      │  │  :8081    │  │  :1420   │
+     └─────────────┘  └───────────┘  └──────────┘
+
+All three frontends use @enlace/core's apiFetch() to communicate with
+the server. The API client handles:
+  • Base URL configuration (http://localhost:3001 in dev)
+  • JWT token injection via Authorization header
+  • JSON serialization/deserialization
+  • Error handling with ApiError class
+
+
+================================================================================
+5. ENVIRONMENT VARIABLES REFERENCE
+================================================================================
+
+SERVER (apps/server/.env):
+  DATABASE_URL          PostgreSQL connection string
+                       Example: postgresql://user:pass@localhost:5432/enlace
+  PORT                 Server port (default: 3001)
+  HOST                 Bind address (default: 0.0.0.0)
+  JWT_SECRET           Secret key for JWT signing (change in production!)
+  TRIAGE_PROVIDER      "claude" | "openai" | "openai-compatible" | "rule-based"
+  ANTHROPIC_API_KEY    Required if TRIAGE_PROVIDER=claude
+  OPENAI_API_KEY       Required if TRIAGE_PROVIDER=openai
+  OPENAI_BASE_URL      Optional override for OpenAI-compatible providers
+  OPENAI_MODEL         Optional model override (default: gpt-4o)
+  CLAUDE_MODEL         Optional model override (default: claude-sonnet-4-20250514)
+
+WEB/DESKTOP (for future API integration):
+  VITE_API_URL         Backend API URL (default: http://localhost:3001)
+
+MOBILE:
+  EXPO_PUBLIC_API_URL  Backend API URL (for future use)
+
+
+================================================================================
+6. LOCAL DEVELOPMENT SETUP
+================================================================================
+
+Prerequisites:
+  • Node.js >= 22.12.0
+  • pnpm 9.15.5 (or let corepack install it)
+  • PostgreSQL 15+ (for server)
+  • Rust toolchain (for desktop/Tauri builds)
+
+Step 1: Clone and install
+  git clone <repo-url> enlace
+  cd enlace
+  pnpm install
+
+Step 2: Start the development servers (all at once)
+  pnpm dev                    # Runs web, desktop, and server in parallel
+
+  Or individually:
+  pnpm dev:web                # Web at http://localhost:5173
+  pnpm dev:server             # Server at http://localhost:3001
+  pnpm dev:desktop            # Desktop window (Tauri dev mode)
+  cd apps/mobile && pnpm dev  # Mobile at http://localhost:8081
+
+Step 3: Typecheck everything
+  pnpm typecheck
+
+Step 4: Build everything
+  pnpm build
+
+
+================================================================================
+7. DATABASE SETUP, SEEDING & ROUTE IMPLEMENTATION
+================================================================================
+
+This section covers what still needs to be done: initializing the database,
+running the seed script, and implementing the remaining route handlers.
+
+--------------------------------------------------------------------------------
+7a. Database Setup
+--------------------------------------------------------------------------------
+
+1. Install and start PostgreSQL:
+   - macOS: brew install postgresql && brew services start postgresql
+   - Ubuntu: sudo apt install postgresql && sudo systemctl start postgresql
+   - Docker: docker run -d --name enlace-pg -p 5432:5432 -e POSTGRES_PASSWORD=secret -e POSTGRES_DB=enlace postgres:16
+
+2. Create the .env file in apps/server/:
+   cd apps/server
+   cat > .env << 'EOF'
+   DATABASE_URL=postgresql://postgres:secret@localhost:5432/enlace
+   JWT_SECRET=your-production-secret-change-this
+   TRIAGE_PROVIDER=rule-based
+   PORT=3001
+   EOF
+
+3. Generate the Prisma client and push the schema:
+   cd apps/server
+   pnpm db:generate    # Generates the Prisma client
+   pnpm db:push        # Creates all tables in the database
+
+4. Verify the schema was applied:
+   pnpm db:studio      # Opens Prisma Studio in your browser
+
+--------------------------------------------------------------------------------
+7b. Seeding the Database
+--------------------------------------------------------------------------------
+
+The seed script (prisma/seed.ts) creates realistic ISP data:
+
+  • 3 Plans: Fibra Básico (100Mbps/R$59.90), Fibra Premium (200Mbps/R$89.90),
+    Fibra Ultra (500Mbps/R$129.90)
+  • 2 Customers: everton@andrade.com.br (Premium), joao@example.com (Básico)
+  • 1 Staff: admin@enlace.com
+  • 3 Tickets with AI triage results (speed issue, billing, outage)
+  • 2 Outage events (fiber cut, power failure)
+  • 2 Invoices (pending)
+
+All passwords: password123
+
+Run the seed:
+  cd apps/server
+  pnpm db:seed
+
+Verify:
+  pnpm db:studio       # Browse tables in browser
+  curl http://localhost:3001/api/health   # Should return {"status":"ok"}
+
+Test login:
+  curl -X POST http://localhost:3001/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"everton@andrade.com.br","password":"password123"}'
+
+--------------------------------------------------------------------------------
+7c. Implementing Route Handlers
+--------------------------------------------------------------------------------
+
+The route files already have FULL implementations for:
+  ✓ auth.ts      — register, login, /me
+  ✓ tickets.ts   — list, get, create (with AI triage), update, get triage
+  ✓ outages.ts   — list, get, create, update
+
+The following routes need their handlers completed:
+
+1. CUSTOMERS ROUTE (src/routes/customers.ts):
+   Currently scaffolded. Implement:
+
+   GET /api/customers
+     - Staff/admin: return all customers with plan info
+     - Customer: return own profile
+
+   GET /api/customers/:id
+     - Staff: return customer with plan, recent tickets, invoices
+     - Customer: return own data only
+
+   PATCH /api/customers/:id
+     - Staff only: update customer plan, status, contact info
+
+   Example implementation:
+     app.get('/', { preHandler: [authenticate] }, async (req, reply) => {
+       const user = (req as AuthenticatedRequest).user;
+       if (user.role === 'customer') {
+         const customer = await prisma.customer.findUnique({
+           where: { userId: user.sub },
+           include: { plan: true },
+         });
+         return reply.send([customer]);
+       }
+       const customers = await prisma.customer.findMany({
+         include: { plan: true },
+         orderBy: { createdAt: 'desc' },
+       });
+       return reply.send(customers);
+     });
+
+2. INVOICES ROUTE (src/routes/invoices.ts):
+   Implement:
+
+   GET /api/invoices
+     - Customer: own invoices sorted by due date
+     - Staff: all invoices
+
+   GET /api/invoices/:id
+     - Get single invoice with line items
+
+   POST /api/invoices (staff only)
+     - Create a new invoice for a customer
+
+   PATCH /api/invoices/:id (staff only)
+     - Update invoice status (mark as paid, overdue, etc.)
+
+   POST /api/invoices/:id/pay
+     - Mark invoice as paid (for future payment gateway integration)
+
+3. PLANS ROUTE (src/routes/plans.ts):
+   Implement:
+
+   GET /api/plans
+     - Public: list all available plans with pricing
+
+   GET /api/plans/:id
+     - Public: get plan details
+
+   POST /api/plans (admin only)
+     - Create new plan
+
+   PATCH /api/plans/:id (admin only)
+     - Update plan pricing/features
+
+   Example:
+     app.get('/', async (_req, reply) => {
+       const plans = await prisma.plan.findMany({
+         orderBy: { price: 'asc' },
+       });
+       return reply.send(plans);
+     });
+
+--------------------------------------------------------------------------------
+7d. Connecting Frontend to Backend
+--------------------------------------------------------------------------------
+
+The frontends currently use hardcoded mock data. To connect them:
+
+1. In the mobile app (src/i18n.ts or a new src/lib/api.ts):
+   import { configureApiClient } from '@enlace/core';
+   configureApiClient({
+     baseUrl: process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001',
+     getToken: () => SecureStore.getItemAsync('auth-token'),
+   });
+
+2. In the web app (src/lib/api.ts):
+   import { configureApiClient } from '@enlace/core';
+   configureApiClient({
+     baseUrl: import.meta.env.VITE_API_URL ?? 'http://localhost:3001',
+     getToken: () => localStorage.getItem('auth-token'),
+   });
+
+3. Replace mock data in each screen with API calls:
+   // Before (mock):
+   const TICKETS = [{ id: '1', subject: '...' }];
+
+   // After (real):
+   import { api } from '@enlace/core';
+   const [tickets, setTickets] = useState([]);
+   useEffect(() => {
+     api.get('/api/tickets').then(setTickets);
+   }, []);
+
+4. Implement auth flow:
+   - Login screen calls POST /api/auth/login
+   - Store JWT token in SecureStore (mobile) or localStorage (web)
+   - configureApiClient's getToken returns the stored token
+   - After login, redirect to dashboard
+
+
+================================================================================
+8. DEPLOYMENT INSTRUCTIONS
+================================================================================
+
+--------------------------------------------------------------------------------
+8a. Push to GitHub
+--------------------------------------------------------------------------------
+
+1. Create a GitHub repository:
+   - Go to https://github.com/new
+   - Repository name: enlace
+   - Visibility: Private (recommended for now)
+   - Do NOT initialize with README (we already have files)
+
+2. Initialize git in the project (if not already):
+   cd enlace
+   git init
+   git add -A
+   git commit -m "Initial commit: Enlace ISP monorepo"
+
+3. Set the remote and push:
+   git remote add origin https://github.com/YOUR_USERNAME/enlace.git
+   git branch -M main
+   git push -u origin main
+
+4. Add a proper .gitignore (verify these are present):
+   node_modules/
+   .pnpm-store/
+   dist/
+   build/
+   .next/
+   .astro/
+   target/           # Tauri builds
+   .expo/
+   android/
+   ios/
+   *.env
+   .env.local
+   apps/server/src/generated/   # Prisma generated client
+
+Note: Do NOT commit apps/server/.env — add it to .gitignore.
+
+--------------------------------------------------------------------------------
+8b. Deploy Web App to Netlify
+--------------------------------------------------------------------------------
+
+Option 1: Netlify CLI
+  npm install -g netlify-cli
+  cd enlace
+  pnpm build:web
+  netlify deploy --dir=apps/web/dist --prod
+
+Option 2: Netlify Dashboard (recommended)
+  1. Go to https://app.netlify.com
+  2. Click "Add new site" → "Import an existing project"
+  3. Connect your GitHub repository
+  4. Configure build settings:
+     • Build command: cd apps/web && pnpm install && pnpm build
+     • Publish directory: apps/web/dist
+     • Base directory: (leave blank or set to apps/web)
+  5. Add environment variables:
+     • VITE_API_URL = https://your-server-url.onrender.com
+  6. Click "Deploy site"
+
+  For a monorepo, you may need to set the base directory:
+     • Base directory: apps/web
+     • Build command: pnpm install --frozen-lockfile && pnpm build
+     • Publish directory: dist
+
+  Netlify may need a netlify.toml in apps/web/:
+     [build]
+     command = "pnpm install && pnpm build"
+     publish = "dist"
+
+     [[redirects]]
+     from = "/*"
+     to = "/index.html"
+     status = 200
+
+Option 3: Vercel
+  1. Go to https://vercel.com
+  2. Import your GitHub repository
+  3. Framework preset: Vite
+  4. Root directory: apps/web
+  5. Build command: pnpm install && pnpm build
+  6. Output directory: dist
+  7. Add environment variable: VITE_API_URL
+  8. Deploy
+
+  For monorepo detection, Vercel usually auto-detects. If not:
+  Create vercel.json at the root:
+  {
+    "buildCommand": "cd apps/web && pnpm install && pnpm build",
+    "outputDirectory": "apps/web/dist",
+    "installCommand": "pnpm install"
+  }
+
+--------------------------------------------------------------------------------
+8c. Deploy Server (Backend API)
+--------------------------------------------------------------------------------
+
+Option 1: Railway (recommended for PostgreSQL + Node.js)
+  1. Go to https://railway.app
+  2. Create a new project → "Deploy from GitHub repo"
+  3. Select your enlace repository
+  4. Add a PostgreSQL database service in the same project
+  5. Set environment variables:
+     DATABASE_URL = (Railway provides this automatically for linked PG)
+     JWT_SECRET = <your-random-secret>
+     TRIAGE_PROVIDER = rule-based
+     PORT = 3001
+  6. Set the root directory to apps/server
+  7. Build command: pnpm install && pnpm db:generate && pnpm db:push
+  8. Start command: pnpm start (or node dist/index.js)
+  9. Railway will auto-deploy on every push to main
+
+Option 2: Render
+  1. Go to https://dashboard.render.com
+  2. Create a "Web Service" from your GitHub repo
+  3. Settings:
+     • Name: enlace-api
+     • Runtime: Node
+     • Build command: cd apps/server && pnpm install && pnpm db:generate && pnpm db:push
+     • Start command: cd apps/server && pnpm start
+     • Port: 3001
+  4. Create a PostgreSQL database (Render → New → PostgreSQL)
+  5. Copy the Internal Database URL to DATABASE_URL env var
+  6. Add other env vars (JWT_SECRET, TRIAGE_PROVIDER)
+  7. Deploy
+
+Option 3: Fly.io
+  1. Install flyctl: curl -L https://fly.io/install.sh | sh
+  2. cd apps/server
+  3. fly launch (creates fly.toml)
+  4. fly volumes create enlace_data --region gru  (São Paulo)
+  5. Set secrets: fly secrets set DATABASE_URL=... JWT_SECRET=...
+  6. fly deploy
+
+  Create a Dockerfile in apps/server/:
+     FROM node:22-slim
+     WORKDIR /app
+     COPY package.json pnpm-lock.yaml ./
+     RUN corepack enable && pnpm install --prod
+     COPY prisma ./prisma/
+     COPY src ./src/
+     RUN npx prisma generate
+     EXPOSE 3001
+     CMD ["node", "dist/index.js"]
+
+After deployment, remember to:
+  - Run the seed script against the production database:
+    DATABASE_URL=<prod-url> pnpm db:seed
+  - Set TRIAGE_PROVIDER to "claude" or "openai" if you want AI triage
+  - Set a strong JWT_SECRET (not the dev default)
+
+--------------------------------------------------------------------------------
+8d. Build & Publish Mobile App
+--------------------------------------------------------------------------------
+
+Android (Google Play Store):
+
+1. EAS Build (already set up):
+   cd apps/mobile
+   npx eas-cli@latest build --profile production --platform android
+
+   This produces an AAB (Android App Bundle) file.
+
+2. Submit to Google Play:
+   npx eas-cli@latest submit --platform android --latest
+
+   (Requires Google Play Console developer account and service account key)
+
+3. Or download the AAB manually:
+   The build output provides a download URL (expo.dev/artifacts/eas/...)
+
+iOS (App Store):
+
+1. Build for iOS:
+   cd apps/mobile
+   npx eas-cli@latest build --profile production --platform ios
+
+   (Requires Apple Developer account and signing certificates)
+
+2. Submit:
+   npx eas-cli@latest submit --platform ios --latest
+
+EAS Update (OTA JavaScript updates):
+  npx eas-cli@latest update --branch production
+
+  This pushes JS changes without rebuilding the native app.
+
+--------------------------------------------------------------------------------
+8e. Build Desktop App (Tauri)
+--------------------------------------------------------------------------------
+
+1. Install Rust toolchain:
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+2. Install system dependencies:
+   - Windows: Microsoft Visual Studio C++ Build Tools
+   - macOS: xcode-select --install
+   - Ubuntu: sudo apt install libwebkit2gtk-4.1-dev libappindicator3-dev \
+     librsvg2-dev patchelf
+
+3. Build the desktop app:
+   cd enlace
+   pnpm --filter @enlace/desktop tauri:build
+
+   Output installers in apps/desktop/src-tauri/target/release/bundle/:
+   - Windows: .msi installer
+   - macOS: .dmg installer
+   - Linux: .deb and .AppImage
+
+4. For CI/CD, use GitHub Actions with the Tauri action:
+   .github/workflows/desktop.yml:
+     name: Build Desktop
+     on: push:
+       branches: [main]
+     jobs:
+       build:
+         strategy:
+           matrix:
+             include:
+               - platform: windows-latest
+               - platform: macos-latest
+               - platform: ubuntu-22.04
+         runs-on: ${{ matrix.platform }}
+         steps:
+           - uses: actions/checkout@v4
+           - uses: pnpm/action-setup@v4
+           - uses: actions/setup-node@v4
+             with: { node-version: 22 }
+           - run: pnpm install --frozen-lockfile
+           - uses: tauri-apps/tauri-action@v0
+             env:
+               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+================================================================================
+9. API REFERENCE
+================================================================================
+
+All endpoints return JSON. Protected endpoints require:
+  Authorization: Bearer <jwt-token>
+
+AUTH:
+  POST /api/auth/register     Body: { email, password, name, phone?, address? }
+                              Returns: { token, user, customer }
+
+  POST /api/auth/login        Body: { email, password }
+                              Returns: { token, user, customer }
+
+  GET  /api/auth/me           Returns: { id, email, name, role, customer }
+
+TICKETS:
+  GET  /api/tickets           Returns: Ticket[] (filtered by role)
+  GET  /api/tickets/:id       Returns: Ticket (with customer)
+  POST /api/tickets           Body: { customerId, subject, body }
+                              Returns: Ticket (with AI triage result)
+  PATCH /api/tickets/:id      Body: { status?, priority?, category? }
+                              Returns: Ticket
+  GET  /api/tickets/:id/triage Returns: { ticketId, triage }
+
+OUTAGES:
+  GET  /api/outages           Returns: OutageEvent[]
+  GET  /api/outages/:id       Returns: OutageEvent
+  POST /api/outages           Body: { title, affectedArea, description? }
+                              Returns: OutageEvent (auth required)
+  PATCH /api/outages/:id      Body: { status?, estimatedResolution? }
+                              Returns: OutageEvent (auth required)
+
+CUSTOMERS:
+  GET  /api/customers         Returns: Customer[] (role-filtered)
+  GET  /api/customers/:id     Returns: Customer
+  PATCH /api/customers/:id    Body: { planId?, status?, ... }
+
+INVOICES:
+  GET  /api/invoices          Returns: Invoice[]
+  GET  /api/invoices/:id      Returns: Invoice
+  POST /api/invoices          Body: { customerId, amount, dueDate, ... }
+  PATCH /api/invoices/:id     Body: { status? }
+
+PLANS:
+  GET  /api/plans             Returns: Plan[]
+  GET  /api/plans/:id         Returns: Plan
+
+HEALTH:
+  GET  /api/health            Returns: { status, timestamp, triageProvider }
+
+
+================================================================================
+10. WHAT WAS DONE TODAY (SESSION LOG)
+================================================================================
+
+Session date: August 22, 2026
+
+A. EAS BUILD SETUP & FIXES
+   - Ran npx create-expo-app@latest to scaffold Expo project
+   - Initialized EAS project with project ID 05008d84-ea1d-4a68-920a-de42f5a16184
+   - Fixed eas init run from wrong directory (root vs apps/mobile)
+   - Fixed package version mismatches:
+     • expo-dev-client: ^57 → removed (SDK 57 → not needed for SDK 53)
+     • expo-system-ui: ^57 → ~5.0.0 (SDK 53 compatible)
+   - Fixed pnpm version: pnpm@11.20.0 → pnpm@9.15.5 (match EAS SDK 53 image)
+   - Added nodeLinker: hoisted to pnpm-workspace.yaml
+   - Inlined @enlace/core i18n resources into mobile app (avoid workspace: dep)
+   - Removed workspace deps (@enlace/core, @enlace/config) from mobile
+   - Made tsconfig.json self-contained
+   - Created pnpm.overrides for expo-constants (~17.0.0) and
+     expo-linking (~6.0.0) to prevent SDK 57 versions leaking in
+   - Regenerated pnpm-lock.yaml for pnpm 9 compatibility
+   - Created .easignore to exclude non-mobile apps and generated dirs
+
+B. ANDROID PRODUCTION BUILD
+   - Successfully built production AAB via EAS Build
+   - Multiple iterations fixing: install deps, expo-dev-menu Kotlin error,
+     Gradle projectRoot error, autolinking issues
+   - Final working build with all fixes applied
+
+C. CUSTOM APP ICONS & SPLASH SCREEN
+   - Generated custom PNG assets using Node.js + sharp:
+     • icon.png (1024x1024) — purple gradient globe + "E" letter
+     • adaptive-icon.png (1024x1024) — transparent foreground for Android
+     • splash-icon.png (200x200) — globe logo on transparent background
+     • favicon.png (48x48) — miniature app icon
+   - All assets use the #7c3aed purple brand color
+
+D. ANIMATED SPLASH SCREEN
+   - Installed expo-splash-screen ~0.30.0
+   - Created AnimatedSplash component with:
+     • Spring-animated logo scale (0.8 → 1.0)
+     • 360° globe rotation (800ms)
+     • Text fade-in ("E" letter + "ENLACE")
+     • 400ms hold, then unmounts
+   - Integrated into _layout.tsx above tab navigator
+
+E. HAPTIC FEEDBACK
+   - Installed expo-haptics ~14.1.0
+   - Added light impact feedback on every tab focus event
+   - Catches errors silently (haptics unavailable on some devices/emulators)
+
+F. PULL-TO-REFRESH
+   - Created shared useRefresh hook (src/hooks/useRefresh.ts)
+   - Added RefreshControl to all 4 data screens:
+     • Dashboard, Outages, Tickets, Billing
+   - Purple (#7c3aed) themed spinner on both light and dark modes
+   - 800ms minimum display time for visual feedback
+
+G. CODE QUALITY
+   - Full monorepo typecheck: 6/6 packages pass (zero errors)
+   - Mobile typecheck: passes after every change
+   - ESLint config not yet created (Eslint v9+ requires eslint.config.*)
+
+H. DOCUMENTATION
+   - Created this comprehensive documentation file
+
+CURRENT BUILD ARTIFACTS:
+   • Android AAB: https://expo.dev/artifacts/eas/N50Z66vsNre0q3DboDRhuVbOAQIcWPd07na9aX35MkU.aab
+   • EAS Build log: https://expo.dev/accounts/evertonst/projects/enlace/builds/5e2b17ca-975d-467f-be2f-70b1068bdfa2
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================

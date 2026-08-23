@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Enlace",
+    "slug": "enlace",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "enlace",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7c3aed"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#7c3aed"
+      },
+      "package": "com.enlace.mobile"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "05008d84-ea1d-4a68-920a-de42f5a16184"
+      }
+    },
+    "owner": "evertonst"
+  }
+}

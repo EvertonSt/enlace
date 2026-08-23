@@ -1,0 +1,20 @@
+node_modules
+.git
+.turbo
+*.db
+*.db-journal
+.env
+.env.local
+dist
+build
+.expo
+*.tsbuildinfo
+
+# Mobile & desktop apps (not needed for server)
+apps/mobile
+apps/desktop
+apps/web
+
+# Generated Prisma (will be regenerated in container)
+apps/server/src/generated
+apps/server/prisma/dev.db*

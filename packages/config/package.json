@@ -1,0 +1,15 @@
+{
+  "name": "@enlace/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./eslint": "./eslint/base.mjs",
+    "./prettier": "./prettier/index.mjs"
+  },
+  "dependencies": {
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.66.0"
+  }
+}

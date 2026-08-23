@@ -1,0 +1,1 @@
+{"noc-console":{"identifier":"noc-console","description":"NOC Console capabilities","local":true,"windows":["main"],"permissions":["core:default","core:window:default","core:window:allow-set-title","core:window:allow-minimize","core:window:allow-close","core:window:allow-show","core:window:allow-hide","store:default","notification:default","notification:allow-notify"]}}

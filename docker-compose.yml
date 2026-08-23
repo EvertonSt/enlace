@@ -1,0 +1,51 @@
+# Docker Compose — Production-like local development with PostgreSQL
+# Usage:
+#   docker compose up -d          # Start everything
+#   docker compose logs -f server # Follow server logs
+#   docker compose down -v        # Stop and remove data
+#   docker compose exec server npx tsx prisma/seed.ts  # Seed database
+
+services:
+  # ── PostgreSQL ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: enlace
+      POSTGRES_USER: enlace
+      POSTGRES_PASSWORD: enlace_secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U enlace -d enlace"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Enlace API Server ──────────────────────────────────────
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile.pg
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: "postgresql://enlace:enlace_secret@postgres:5432/enlace?schema=public"
+      JWT_SECRET: "dev-secret-change-in-prod"
+      TRIAGE_PROVIDER: "rule-based"
+      PORT: "3001"
+      HOST: "0.0.0.0"
+      NODE_ENV: "production"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

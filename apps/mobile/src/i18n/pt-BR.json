@@ -1,0 +1,173 @@
+{
+  "common": {
+    "appName": "Enlace",
+    "loading": "Carregando…",
+    "error": "Algo deu errado",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "search": "Buscar",
+    "noData": "Sem dados disponíveis",
+    "language": "Idioma",
+    "settings": "Configurações",
+    "status": "Status",
+    "confirm": "Confirmar",
+    "warning": "Atenção"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "email": "Endereço de e-mail",
+    "password": "Senha",
+    "forgotPassword": "Esqueceu a senha?",
+    "signIn": "Entrar",
+    "signingIn": "Entrando…",
+    "loggingIn": "Entrando…",
+    "invalidCredentials": "E-mail ou senha inválidos",
+    "welcomeBack": "Bem-vindo de volta",
+    "noAccount": "Não tem conta?",
+    "register": "Cadastrar",
+    "rememberMe": "Lembrar de mim",
+    "emailRequired": "E-mail é obrigatório",
+    "invalidEmail": "Endereço de e-mail inválido",
+    "passwordRequired": "Senha é obrigatória",
+    "passwordMinLength": "Mínimo de 6 caracteres"
+  },
+  "nav": {
+    "dashboard": "Painel",
+    "outages": "Interrupções",
+    "tickets": "Chamados",
+    "billing": "Faturamento",
+    "speedTest": "Teste de Velocidade",
+    "technicians": "Técnicos",
+    "nocDashboard": "Painel NOC",
+    "customerLookup": "Clientes",
+    "dispatch": "Técnicos"
+  },
+  "dashboard": {
+    "title": "Painel",
+    "currentPlan": "Plano Atual",
+    "dataUsage": "Uso de Dados",
+    "dataUsageCycle": "Ciclo de faturamento atual",
+    "nextBill": "Próxima Fatura",
+    "dueOn": "Vence em {{date}}",
+    "recentTickets": "Chamados Recentes",
+    "activeOutages": "Interrupções Ativas",
+    "noActiveOutages": "Nenhuma interrupção na sua área",
+    "planDetails": {
+      "speed": "{{speed}} Mbps",
+      "unlimited": "Dados ilimitados — sem franquia"
+    },
+    "perMonth": "/mês",
+    "customersAffected": "{{count}} clientes afetados",
+    "activeIncidents": "Incidentes Ativos ({{count}})",
+    "resolvedIncidents": "Resolvidos ({{count}})",
+    "viewAll": "Ver Todos"
+  },
+  "outage": {
+    "title": "Mapa de Interrupções",
+    "reported": "Reportado",
+    "investigating": "Investigando",
+    "identified": "Identificado",
+    "fixInProgress": "Conserto em Andamento",
+    "resolved": "Resolvido",
+    "startedAt": "Início",
+    "estimatedResolution": "Resolução Estimada",
+    "affectedCustomers": "{{count}} clientes afetados",
+    "live": "Ao vivo",
+    "offline": "Offline — dados em cache",
+    "eta": "Previsão"
+  },
+  "ticket": {
+    "title": "Chamados de Suporte",
+    "newTicket": "Novo Chamado",
+    "createTicket": "Criar Chamado",
+    "subject": "Assunto",
+    "description": "Descrição",
+    "submitting": "Enviando…",
+    "submitted": "Chamado enviado",
+    "ticketCount": "{{count}} chamados",
+    "noTickets": "Nenhum chamado encontrado",
+    "closeTicket": "Fechar chamado?",
+    "closeTicketDesc": "Isso marcará o chamado como fechado",
+    "status": {
+      "all": "Todos",
+      "open": "Aberto",
+      "in_progress": "Em Andamento",
+      "waiting_customer": "Aguardando Cliente",
+      "resolved": "Resolvido",
+      "closed": "Fechado"
+    },
+    "priority": {
+      "low": "Baixa",
+      "medium": "Média",
+      "high": "Alta",
+      "critical": "Crítica"
+    },
+    "category": {
+      "outage": "Interrupção",
+      "billing": "Faturamento",
+      "speed": "Problema de Velocidade",
+      "installation": "Instalação",
+      "equipment": "Equipamento",
+      "other": "Outro"
+    },
+    "triage": {
+      "title": "Resultado da Triagem por IA",
+      "urgency": "Urgência",
+      "urgencyScore": "Pontuação: {{score}}/5",
+      "suggestedResponse": "Resposta Sugerida",
+      "provider": "Provedor",
+      "model": "Modelo",
+      "confidence": "Confiança",
+      "triagedAt": "Triado em {{time}}",
+      "approveResponse": "Aprovar e Enviar",
+      "editResponse": "Editar",
+      "noTriage": "Triagem pendente…"
+    }
+  },
+  "billing": {
+    "title": "Faturamento",
+    "invoices": "Faturas",
+    "amountDue": "Valor a Pagar",
+    "dueDate": "Data de Vencimento",
+    "status": {
+      "pending": "Pendente",
+      "paid": "Pago",
+      "overdue": "Atrasado",
+      "cancelled": "Cancelado"
+    }
+  },
+  "speedTest": {
+    "title": "Teste de Velocidade",
+    "start": "Iniciar Teste",
+    "testing": "Testando",
+    "download": "Velocidade de Download",
+    "upload": "Velocidade de Upload",
+    "latency": "Latencia",
+    "server": "Servidor"
+  },
+  "technician": {
+    "title": "Visita Técnica",
+    "scheduled": "Agendado",
+    "enRoute": "A Caminho",
+    "onSite": "No Local",
+    "completed": "Concluído",
+    "cancelled": "Cancelado",
+    "estimatedArrival": "Chegada estimada"
+  },
+  "themeToggle": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "languageToggle": {
+    "label": "Idioma",
+    "english": "English",
+    "portuguese": "Português (BR)"
+  }
+}

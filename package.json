@@ -1,0 +1,40 @@
+{
+  "name": "enlace",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Enlace — ISP Customer & Network Operations Suite",
+  "packageManager": "pnpm@9.15.5",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:web": "pnpm --filter @enlace/web dev",
+    "dev:desktop": "pnpm --filter @enlace/desktop dev",
+    "dev:server": "pnpm --filter @enlace/server dev",
+    "build": "turbo build",
+    "build:web": "pnpm --filter @enlace/web build",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "e2e": "turbo e2e",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down -v",
+    "docker:logs": "docker compose logs -f server",
+    "docker:seed": "docker compose exec server npx tsx prisma/seed.ts",
+    "docker:build": "docker compose build --no-cache",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "turbo": "^2.10.8",
+    "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "expo-constants": "~17.0.0",
+      "expo-linking": "~6.0.0"
+    }
+  }
+}

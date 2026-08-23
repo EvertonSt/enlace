@@ -1,0 +1,173 @@
+{
+  "common": {
+    "appName": "Enlace",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "search": "Search",
+    "noData": "No data available",
+    "language": "Language",
+    "settings": "Settings",
+    "status": "Status",
+    "confirm": "Confirm",
+    "warning": "Warning"
+  },
+  "auth": {
+    "login": "Log In",
+    "logout": "Log Out",
+    "email": "Email address",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign In",
+    "signingIn": "Signing in…",
+    "loggingIn": "Logging in…",
+    "invalidCredentials": "Invalid email or password",
+    "welcomeBack": "Welcome back",
+    "noAccount": "Don't have an account?",
+    "register": "Register",
+    "rememberMe": "Remember me",
+    "emailRequired": "Email is required",
+    "invalidEmail": "Invalid email address",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Minimum 6 characters"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "outages": "Outages",
+    "tickets": "Support Tickets",
+    "billing": "Billing",
+    "speedTest": "Speed Test",
+    "technicians": "Technicians",
+    "nocDashboard": "NOC Dashboard",
+    "customerLookup": "Customers",
+    "dispatch": "Technicians"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "currentPlan": "Current Plan",
+    "dataUsage": "Data Usage",
+    "dataUsageCycle": "This billing cycle",
+    "nextBill": "Next Bill",
+    "dueOn": "Due on {{date}}",
+    "recentTickets": "Recent Tickets",
+    "activeOutages": "Active Outages",
+    "noActiveOutages": "No active outages in your area",
+    "planDetails": {
+      "speed": "{{speed}} Mbps",
+      "unlimited": "Unlimited data — no caps"
+    },
+    "perMonth": "/mo",
+    "customersAffected": "{{count}} customers affected",
+    "activeIncidents": "Active Incidents ({{count}})",
+    "resolvedIncidents": "Resolved ({{count}})",
+    "viewAll": "View All"
+  },
+  "outage": {
+    "title": "Outage Map",
+    "reported": "Reported",
+    "investigating": "Investigating",
+    "identified": "Identified",
+    "fixInProgress": "Fix in Progress",
+    "resolved": "Resolved",
+    "startedAt": "Started",
+    "estimatedResolution": "Estimated Resolution",
+    "affectedCustomers": "{{count}} customers affected",
+    "live": "Live",
+    "offline": "Offline — cached data",
+    "eta": "ETA"
+  },
+  "ticket": {
+    "title": "Support Tickets",
+    "newTicket": "New Ticket",
+    "createTicket": "Create Ticket",
+    "subject": "Subject",
+    "description": "Description",
+    "submitting": "Submitting…",
+    "submitted": "Ticket submitted",
+    "ticketCount": "{{count}} tickets",
+    "noTickets": "No tickets found",
+    "closeTicket": "Close ticket?",
+    "closeTicketDesc": "This will mark the ticket as closed",
+    "status": {
+      "all": "All",
+      "open": "Open",
+      "in_progress": "In Progress",
+      "waiting_customer": "Waiting for Customer",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "category": {
+      "outage": "Outage",
+      "billing": "Billing",
+      "speed": "Speed Issue",
+      "installation": "Installation",
+      "equipment": "Equipment",
+      "other": "Other"
+    },
+    "triage": {
+      "title": "AI Triage Result",
+      "urgency": "Urgency",
+      "urgencyScore": "Score: {{score}}/5",
+      "suggestedResponse": "Suggested Response",
+      "provider": "Provider",
+      "model": "Model",
+      "confidence": "Confidence",
+      "triagedAt": "Triaged at {{time}}",
+      "approveResponse": "Approve & Send",
+      "editResponse": "Edit",
+      "noTriage": "Triage pending…"
+    }
+  },
+  "billing": {
+    "title": "Billing",
+    "invoices": "Invoices",
+    "amountDue": "Amount Due",
+    "dueDate": "Due Date",
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled"
+    }
+  },
+  "speedTest": {
+    "title": "Speed Test",
+    "start": "Start Test",
+    "testing": "Testing",
+    "download": "Download Speed",
+    "upload": "Upload Speed",
+    "latency": "Latency",
+    "server": "Server"
+  },
+  "technician": {
+    "title": "Technician Visit",
+    "scheduled": "Scheduled",
+    "enRoute": "On the Way",
+    "onSite": "On Site",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "estimatedArrival": "Estimated arrival"
+  },
+  "themeToggle": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "languageToggle": {
+    "label": "Language",
+    "english": "English",
+    "portuguese": "Português (BR)"
+  }
+}
