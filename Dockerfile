@@ -52,9 +52,11 @@ RUN pnpm install --frozen-lockfile --prod --filter @enlace/server...
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/packages/core/dist ./packages/core/dist
 
-# Copy Prisma schema and config for runtime schema push
+# Copy Prisma schema, config, seed, and generated client for runtime
 COPY apps/server/prisma/schema.postgresql.prisma ./apps/server/prisma/schema.prisma
 COPY apps/server/prisma.config.ts ./apps/server/prisma.config.ts
+COPY apps/server/prisma/seed.ts ./apps/server/prisma/seed.ts
+COPY --from=build /app/apps/server/src/generated ./apps/server/src/generated
 COPY apps/server/scripts/start.sh ./start.sh
 RUN chmod +x ./start.sh
 
