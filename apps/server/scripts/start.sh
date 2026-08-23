@@ -9,9 +9,15 @@ npx prisma db push --accept-data-loss --skip-generate 2>&1 || echo "⚠️ Schem
 echo "🔄 Regenerating Prisma client..."
 npx prisma generate 2>&1 || echo "⚠️ Prisma generate failed, continuing anyway..."
 
-echo "🔗 Linking generated client for compiled code..."
-mkdir -p dist/generated
-cp -r src/generated/prisma/* dist/generated/prisma/ 2>/dev/null || true
+echo "📁 Generated files:"
+ls -la src/generated/prisma/ 2>/dev/null || echo "No src/generated/prisma/"
+
+echo "🔗 Copying generated client to dist..."
+mkdir -p dist/generated/prisma
+cp -a src/generated/prisma/. dist/generated/prisma/ 2>&1 || echo "⚠️ Copy failed"
+
+echo "📁 dist/generated/prisma/ contents:"
+ls -la dist/generated/prisma/ 2>/dev/null || echo "No dist/generated/prisma/"
 
 echo "🚀 Starting server..."
 cd /app
