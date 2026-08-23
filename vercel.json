@@ -1,6 +1,6 @@
 {
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm --filter @enlace/web build",
+  "buildCommand": "pnpm --filter @enlace/core build && pnpm --filter @enlace/web build",
   "outputDirectory": "apps/web/dist",
   "framework": "vite",
   "rewrites": [
