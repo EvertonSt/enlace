@@ -48,6 +48,7 @@ COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/packages/core/dist ./packages/core/dist
 COPY --from=prisma /app/apps/server/src/generated ./apps/server/src/generated
 COPY apps/server/prisma/schema.prisma ./apps/server/prisma/
+COPY apps/server/prisma.config.ts ./apps/server/prisma.config.ts
 COPY apps/server/scripts/start.sh ./start.sh
 RUN chmod +x ./start.sh
 
