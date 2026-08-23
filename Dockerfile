@@ -46,12 +46,13 @@ RUN pnpm install --frozen-lockfile --prod --filter @enlace/server...
 # Copy built files
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/packages/core/dist ./packages/core/dist
-COPY --from=prisma /app/apps/server/src/generated ./apps/server/src/generated
-COPY --from=prisma /app/apps/server/src/generated ./apps/server/dist/generated
 COPY apps/server/prisma/schema.prisma ./apps/server/prisma/
 COPY apps/server/prisma.config.ts ./apps/server/prisma.config.ts
 COPY apps/server/scripts/start.sh ./start.sh
 RUN chmod +x ./start.sh
+
+# Generate Prisma client for production (creates .js files, not .ts)
+RUN cd apps/server && DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
 
 ENV NODE_ENV=production
 ENV PORT=3001
