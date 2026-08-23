@@ -1,0 +1,293 @@
+================================================================================
+                         ENLACE ISP PLATFORM
+                   Full Project Description & Documentation
+================================================================================
+
+Table of Contents
+-----------------
+1. Overview
+2. Architecture
+3. Server (API)
+4. Web Application (Customer Portal)
+5. Desktop Application (NOC Console)
+6. Mobile Application (Customer App)
+7. Database Schema
+8. Authentication & Security
+9. Real-Time Features
+10. Deployment Status
+
+================================================================================
+1. OVERVIEW
+================================================================================
+
+Enlace is a full-stack ISP (Internet Service Provider) management platform
+built for a fictional fiber optic company in Paripiranga, Bahia, Brazil.
+It provides customer self-service, NOC (Network Operations Center) staff tools,
+and a mobile app — all backed by a shared API server.
+
+The platform manages:
+  - Fiber optic internet plans (5 tiers, R$59.90 - R$399.90/month)
+  - Customer accounts (12 customers seeded)
+  - Support tickets with AI-powered triage (25 tickets seeded)
+  - Real-time outage tracking with maps (6 outages seeded)
+  - Billing and invoices (24 invoices seeded)
+  - Field technician dispatch (4 technicians seeded)
+
+================================================================================
+2. ARCHITECTURE
+================================================================================
+
+enlace/                          ← Monorepo root
+├── apps/
+│   ├── server/                  ← Fastify API server (Port 3001)
+│   ├── web/                     ← React + Vite customer portal
+│   ├── desktop/                 ← Tauri + React NOC console
+│   └── mobile/                  ← Expo + React Native mobile app
+├── packages/
+│   ├── core/                    ← Shared types, i18n, schemas
+│   └── config/                  ← Shared ESLint, TSConfig, Prettier
+├── Dockerfile                   ← Production server (PostgreSQL)
+├── railway.json                 ← Railway deployment config
+├── docker-compose.yml           ← Local PostgreSQL + server
+├── .github/workflows/ci.yml     ← GitHub Actions CI/CD
+└── pnpm-workspace.yaml          ← pnpm monorepo config
+
+Tech Stack:
+  - Runtime: Node.js 20
+  - Package Manager: pnpm 9.15.5
+  - Build Orchestration: Turborepo
+  - Language: TypeScript 5.9
+  - Database: SQLite (dev) / PostgreSQL (production)
+  - ORM: Prisma 7 with driver adapters
+
+================================================================================
+3. SERVER (API)
+================================================================================
+
+Location: apps/server/
+URL (Production): https://server-production-5ffa.up.railway.app
+Framework: Fastify 5
+
+API Endpoints:
+  POST   /api/auth/register       - Customer registration
+  POST   /api/auth/login          - JWT login (returns token)
+  GET    /api/auth/me             - Current user info
+  GET    /api/plans               - List ISP plans
+  GET    /api/tickets             - List tickets (customer's own)
+  POST   /api/tickets             - Create support ticket
+  PATCH  /api/tickets/:id         - Update ticket status
+  GET    /api/tickets/:id/triage  - AI triage details
+  GET    /api/outages             - List outage events
+  POST   /api/outages             - Create outage (staff)
+  PATCH  /api/outages/:id         - Update outage status
+  GET    /api/customers           - Customer lookup (staff)
+  GET    /api/invoices            - List invoices
+  POST   /api/invoices            - Create invoice (staff)
+  GET    /api/technicians         - List technicians
+  POST   /api/technicians         - Create technician (staff)
+  PATCH  /api/technicians/:id     - Update technician
+  POST   /api/technicians/:id/assign - Assign ticket to tech
+  PATCH  /api/technicians/jobs/:id/complete - Complete a job
+  GET    /api/analytics/overview  - Dashboard KPIs
+  GET    /api/analytics/tickets/* - Ticket analytics
+  GET    /api/analytics/outages/* - Outage analytics
+  GET    /api/analytics/customers/* - Customer analytics
+  GET    /api/analytics/revenue/* - Revenue analytics
+  GET    /api/analytics/technicians/* - Tech performance
+  GET    /ws/outages              - WebSocket: real-time outages
+  GET    /ws/tickets              - WebSocket: real-time tickets
+  GET    /api/health              - Health check
+
+Key Features:
+  - Rate limiting: 100 req/min global, 10/min login, 5/min register
+  - WebSocket real-time broadcasts for outages and tickets
+  - AI triage (rule-based or Claude/OpenAI)
+  - Daily reset scheduler for technician completedToday counter
+  - JWT authentication with role-based access (customer/staff)
+  - Transaction-safe technician assignment
+
+Environment Variables:
+  DATABASE_URL     - PostgreSQL connection string (Railway auto-injects)
+  JWT_SECRET       - Secret key for JWT signing
+  TRIAGE_PROVIDER  - "rule-based", "claude", or "openai"
+  PORT             - Server port (default: 3001)
+  HOST             - Bind address (default: 0.0.0.0)
+
+================================================================================
+4. WEB APPLICATION (Customer Portal)
+================================================================================
+
+Location: apps/web/
+URL (Production): https://enlace-everton-qa.vercel.app
+Framework: React 19 + Vite 6 + Tailwind CSS
+
+Pages:
+  - Login          - Email/password auth
+  - Dashboard      - Plan info, data usage, next bill, outage map, active outages
+  - Outages        - Full outage list with Leaflet map
+  - Support Tickets - Create and track tickets
+  - Billing        - Invoice list and payment status
+  - Speed Test     - Internet speed testing
+  - Reports        - Charts and analytics (recharts)
+
+Features:
+  - Dark/Light theme toggle with persistence
+  - EN/PT-BR language toggle
+  - Pull-to-refresh on all screens
+  - Real-time outage WebSocket updates
+  - Leaflet interactive outage map centered on Paripiranga, BA
+  - Responsive sidebar navigation
+  - Mock data fallback when API is unavailable
+  - SPA routing (all paths redirect to index.html)
+
+Environment Variables:
+  VITE_API_URL  - Backend API URL (set in Vercel dashboard)
+
+================================================================================
+5. DESKTOP APPLICATION (NOC Console)
+================================================================================
+
+Location: apps/desktop/
+Framework: Tauri 2 + React 19 + Vite 6 + Tailwind CSS
+
+Pages:
+  - Login          - Staff authentication (admin@enlace.com / password123)
+  - NOC Dashboard  - Real-time outage monitoring with WebSocket
+  - Support Queue  - Live ticket management with WebSocket
+  - Tech Dispatch  - Assign technicians to tickets
+  - Customer Lookup - Search and view customer details
+
+Features:
+  - WebSocket real-time updates for outages and tickets
+  - Auto-reconnect on connection drop (3s interval)
+  - Live/Offline indicator (green/red dot)
+  - Staff-only access (customer role blocked)
+  - Dark theme
+
+Build Commands:
+  pnpm dev          - Development with hot reload
+  pnpm tauri:build  - Production build (creates .exe/.dmg/.AppImage)
+
+================================================================================
+6. MOBILE APPLICATION (Customer App)
+================================================================================
+
+Location: apps/mobile/
+Framework: Expo SDK 53 + React Native + TypeScript
+
+Screens:
+  - Login          - Password + biometric authentication
+  - Dashboard      - Plan info, usage, next bill, outage map
+  - Outages        - Outage list with pull-to-refresh
+  - Tickets        - Support ticket management
+  - Billing        - Invoice viewing
+  - Settings       - Theme, language, biometrics, cache, logout
+
+Features:
+  - Biometric authentication (fingerprint/face)
+  - Offline caching (AsyncStorage) with network status detection
+  - Offline banner indicator
+  - Push notifications for outage alerts
+  - Real-time outage polling (30s interval)
+  - Animated splash screen with spring physics
+  - Haptic feedback on tab switches
+  - Pull-to-refresh on all screens
+  - Custom app icons (purple globe design)
+  - Dark/Light/System theme with persistence
+  - EN/PT-BR language with persistence
+  - SecureStore for token + biometric credential storage
+
+Build Commands:
+  npx expo start           - Development server
+  eas build --platform android --profile production  - Android AAB
+  eas build --platform ios --profile production       - iOS IPA
+
+Test Credentials:
+  Customer: everton@andrade.com.br / password123
+  Customer: maria.silva@email.com / password123
+  Staff:    admin@enlace.com / password123
+
+================================================================================
+7. DATABASE SCHEMA
+================================================================================
+
+Models:
+  User           - id, email, password (bcrypt), name, role (customer/staff)
+  Plan           - id, name, speedMbps, dataCapGb, price (Decimal), currency
+  Customer       - id, userId, name, email, phone, address, planId, status
+  Ticket         - id, customerId, subject, body, status, priority, category,
+                   assignedTo, aiTriage, createdAt
+  OutageEvent    - id, title, description, status, affectedArea,
+                   affectedCustomerCount, startedAt, estimatedResolution
+  Invoice        - id, customerId, amount (Decimal), currency, dueDate, status,
+                   lineItems (JSON string), createdAt
+  Technician     - id, name, phone, email, area, status, rating, completedToday
+  TechnicianJob  - id, ticketId, technicianId, status, scheduledAt, startedAt,
+                   completedAt, notes, location
+
+Seed Data:
+  - 5 Plans (Fibra Básico through Business 1 Gbps)
+  - 12 Customers (residents of Paripiranga, BA)
+  - 25 Tickets (speed, outage, billing, equipment, installation, other)
+  - 6 Outages (reported through fix_in_progress)
+  - 24 Invoices (12 pending + 12 paid)
+  - 4 Technicians (Camila, Lucas, Diego, Thiago)
+  - 6 Technician Jobs (assigned to tickets)
+
+================================================================================
+8. AUTHENTICATION & SECURITY
+================================================================================
+
+  - Passwords hashed with bcryptjs
+  - JWT tokens (HS256) with role claims (customer/staff)
+  - Role-based access: staff-only endpoints return 403 for customers
+  - WebSocket connections accept optional token for auth
+  - Rate limiting: 100/min global, 10/min login, 5/min register
+  - CORS enabled for all origins (development)
+
+Test Credentials:
+  Customer: everton@andrade.com.br / password123
+  Customer: maria.silva@email.com / password123
+  Staff:    admin@enlace.com / password123
+  All passwords: password123
+
+================================================================================
+9. REAL-TIME FEATURES
+================================================================================
+
+WebSocket Routes:
+  ws://host:3001/ws/outages  - Broadcasts outage created/updated events
+  ws://host:3001/ws/tickets  - Broadcasts ticket created/updated events
+
+Message Protocol:
+  { type: "outage:created", outage: { ... } }
+  { type: "outage:updated", outage: { ... } }
+  { type: "ticket:created", ticket: { ... } }
+  { type: "ticket:updated", ticket: { ... } }
+
+Clients:
+  - Desktop NOC Dashboard: useOutageWs hook (auto-reconnect 3s)
+  - Desktop Support Queue: useTicketWs hook (auto-reconnect 3s)
+  - Web OutagesPage: useOutages hook (connects to ws://.../ws/outages)
+
+================================================================================
+10. DEPLOYMENT STATUS
+================================================================================
+
+| Platform  | Status | URL                                          |
+|-----------|--------|----------------------------------------------|
+| Server    | Live   | https://server-production-5ffa.up.railway.app |
+| Web       | Live   | https://enlace-everton-qa.vercel.app         |
+| Desktop   | Build  | Local only (tauri build)                     |
+| Mobile    | AAB    | EAS Build artifact (previous session)        |
+
+CI/CD:
+  - GitHub Actions: typecheck on every push/PR
+  - Deploy server to Railway on main branch push
+  - Deploy web to Vercel on main branch push
+  - Secrets needed: RAILWAY_TOKEN, VERCEL_TOKEN, VERCEL_ORG_ID,
+    VERCEL_PROJECT_ID, VITE_API_URL
+
+================================================================================
+                          END OF DOCUMENT
+================================================================================

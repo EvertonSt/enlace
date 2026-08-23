@@ -1,0 +1,354 @@
+================================================================================
+              ENLACE — DEPLOYMENT GUIDE & TROUBLESHOOTING
+================================================================================
+
+This document contains all commands, known issues, and fixes encountered during
+deployment. Follow these steps to redeploy or set up a new environment.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. Prerequisites
+2. Initial Setup (First Time)
+3. Railway Deployment (Server API)
+4. Vercel Deployment (Web App)
+5. EAS Build (Mobile App)
+6. GitHub Actions CI/CD
+7. Known Issues & Fixes
+8. Quick Reference Commands
+
+================================================================================
+1. PREREQUISITES
+================================================================================
+
+Install these tools:
+  - Node.js 20+
+  - pnpm 9.15.5 (corepack enable && corepack prepare pnpm@9.15.5 --activate)
+  - Railway CLI: npm install -g @railway/cli
+  - Vercel CLI: npm install -g vercel
+  - GitHub CLI: brew install gh (or winget install GitHub.cli)
+  - Expo CLI: npm install -g eas-cli
+
+Authenticate:
+  railway login
+  vercel login
+  gh auth login
+  eas login
+
+================================================================================
+2. INITIAL SETUP (First Time)
+================================================================================
+
+# Clone and install
+git clone https://github.com/EvertonSt/enlace.git
+cd enlace
+pnpm install
+
+# Verify everything works
+pnpm typecheck        # All 6 packages should pass
+pnpm --filter @enlace/web build   # Web app builds
+
+# Start local development
+cd apps/server && PORT=3001 npx tsx src/index.ts   # API server
+cd apps/web && pnpm dev                              # Web app
+
+================================================================================
+3. RAILWAY DEPLOYMENT (Server API)
+================================================================================
+
+3.1 — First-Time Setup
+-----------------------
+
+# Login to Railway
+railway login
+
+# Initialize project (if not already linked)
+railway init
+# Answer: project name = "enlace"
+
+# Add PostgreSQL database
+railway add -d postgres
+# Answer: Database
+
+# Create a separate server service
+railway add -s server
+# Answer: Empty Service, name = "server"
+
+# Link to the server service
+railway service server
+
+# Set environment variables
+railway variables set JWT_SECRET="your-secret-key-here"
+railway variables set TRIAGE_PROVIDER="rule-based"
+
+# Get the PostgreSQL connection string from the Postgres service
+railway variables ls --service postgres | grep DATABASE_URL
+# Copy the full connection string
+
+# Set DATABASE_URL on the server service
+railway variables set DATABASE_URL="postgresql://postgres:PASSWORD@postgres.railway.internal:5432/railway"
+
+# Deploy
+railway up --service server
+
+# Wait for build to complete, then check status
+railway status
+
+# Verify server is running
+curl -s https://server-production-XXXX.up.railway.app/api/health
+
+3.2 — Redeploy After Code Changes
+-----------------------------------
+
+# Commit and push changes
+git add -A && git commit -m "fix: description" && git push
+
+# Deploy to Railway
+railway up --service server
+
+# Check deployment status
+railway status
+
+# View logs
+railway logs --lines 30 --service server --deployment
+
+3.3 — Railway Architecture Notes
+---------------------------------
+
+IMPORTANT: Railway auto-detects the Dockerfile at the project root.
+The Dockerfile must be at the root (enlace/Dockerfile), NOT in apps/server/.
+
+The Dockerfile uses multi-stage builds:
+  Stage 1 (deps):     Install all workspace dependencies
+  Stage 2 (build):    Generate Prisma client + compile TypeScript
+  Stage 3 (production): Install prod deps only + copy built artifacts
+
+The start.sh script runs on container startup:
+  1. Pushes Prisma schema to PostgreSQL (prisma db push)
+  2. Seeds the database if empty (tsx prisma/seed.ts)
+  3. Starts the Node.js server
+
+================================================================================
+4. VERCEL DEPLOYMENT (Web App)
+================================================================================
+
+4.1 — First-Time Setup
+-----------------------
+
+# Method A: Via Vercel Dashboard (RECOMMENDED)
+1. Go to vercel.com/new
+2. Import Git Repository → search "EvertonSt/enlace"
+3. IMPORTANT: Do NOT select detected directories
+4. Go to Project Settings → Build and Deployment
+5. Set Root Directory to: apps/web
+6. Set Framework to: Other
+7. Add Environment Variable:
+     VITE_API_URL = https://server-production-XXXX.up.railway.app
+8. Click Deploy
+
+# Method B: Via CLI
+cd enlace
+vercel login
+vercel link
+vercel --prod
+
+4.2 — Redeploy After Code Changes
+-----------------------------------
+
+# Just push to GitHub — Vercel auto-deploys from main branch
+git add -A && git commit -m "fix: description" && git push
+
+# Or manually trigger from dashboard:
+# Deployments → ⋯ → Redeploy
+
+4.3 — Vercel Architecture Notes
+--------------------------------
+
+CRITICAL: The root vercel.json was REMOVED because Vercel's monorepo
+detection creates multi-service configs that conflict with custom builds.
+
+Instead, apps/web/vercel.json contains the full config:
+{
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @enlace/core build",
+  "buildCommand": "cd ../.. && pnpm --filter @enlace/web build",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+
+The key insight: Vercel's installCommand/buildCommand run relative to the
+Root Directory (apps/web), so they must cd to the monorepo root first.
+
+The @enlace/core package MUST be built before the web app because the web
+app imports types from it. The build command chains:
+  pnpm --filter @enlace/core build && pnpm --filter @enlace/web build
+
+================================================================================
+5. EAS BUILD (Mobile App)
+================================================================================
+
+# First-time EAS setup
+cd apps/mobile
+eas login
+eas build:configure
+
+# Build Android AAB (production)
+EXPO_PUBLIC_API_URL=https://server-production-XXXX.up.railway.app \
+  eas build --platform android --profile production
+
+# Build for local testing
+eas build --platform android --profile preview
+
+# Submit to Google Play Store
+eas submit --platform android
+
+================================================================================
+6. GITHUB ACTIONS CI/CD
+================================================================================
+
+Required GitHub Secrets:
+  RAILWAY_TOKEN       - Railway API token
+  VERCEL_TOKEN        - Vercel API token
+  VERCEL_ORG_ID       - Vercel org/team ID
+  VERCEL_PROJECT_ID   - Vercel project ID
+  VITE_API_URL        - Backend API URL for the web app
+
+The CI/CD pipeline (.github/workflows/ci.yml):
+  1. Typecheck runs on every push/PR (all 6 packages)
+  2. Server deploys to Railway on main branch push
+  3. Web deploys to Vercel on main branch push
+
+To get Vercel IDs:
+  vercel link    # Creates .vercel/project.json
+  cat .vercel/project.json   # Shows orgId and projectId
+
+================================================================================
+7. KNOWN ISSUES & FIXES
+================================================================================
+
+ISSUE 1: "Cannot find module '@enlace/core'"
+CAUSE:  The @enlace/core package wasn't built before the web/server apps
+FIX:    Add "pnpm --filter @enlace/core build" before the app build command
+WHERE:  vercel.json buildCommand, Dockerfile build stage
+
+ISSUE 2: "Cannot find module 'ws' or its corresponding type declarations"
+CAUSE:  ws is used directly in outage-ws.ts and ticket-ws.ts but isn't a
+        direct dependency (it's transitive via @fastify/websocket)
+FIX:    pnpm add ws @types/ws (in apps/server)
+
+ISSUE 3: "Cannot find module '@prisma/client-runtime-utils'"
+CAUSE:  prisma-client-js generates .js files that require this package
+        at runtime, but --prod install doesn't include it
+FIX:    pnpm add @prisma/client-runtime-utils (in apps/server)
+
+ISSUE 4: "ERR_UNKNOWN_FILE_EXTENSION .ts for enums.ts"
+CAUSE:  Prisma 7's prisma-client generator outputs TypeScript source files
+        that Node.js can't run in production
+FIX:    Switch to prisma-client-js generator in schema.prisma:
+        generator client {
+          provider = "prisma-client-js"
+          output   = "../src/generated/prisma"
+        }
+        Then copy src/generated to dist/generated in the Dockerfile
+
+ISSUE 5: "require is not defined" in ESM module
+CAUSE:  Using CJS require() inside an ESM module (prisma.ts had
+        require('@prisma/adapter-pg'))
+FIX:    Use top-level import: import { PrismaPg } from '@prisma/adapter-pg'
+
+ISSUE 6: Vercel detects wrong directory (e.g., "enlace-desktop")
+CAUSE:  Vercel's monorepo detection picks up apps/desktop/ first
+FIX:    Set Root Directory to "apps/web" in Vercel project settings.
+        Remove root vercel.json to avoid multi-service conflicts.
+
+ISSUE 7: Railway healthcheck fails (server never responds)
+CAUSE:  Server crashes on startup due to missing generated Prisma client
+        or wrong database schema
+FIX:    Ensure Dockerfile copies PostgreSQL schema (not SQLite), copies
+        generated Prisma client to dist/generated/, and start.sh pushes
+        schema before starting server.
+
+ISSUE 8: Seed script fails with "URL_SCHEME_NOT_SUPPORTED"
+CAUSE:  Seed script always uses PrismaLibSql adapter, even for PostgreSQL
+FIX:    Detect DATABASE_URL scheme in seed.ts and use PrismaPg for
+        postgresql:// URLs
+
+ISSUE 9: prisma db push uses wrong schema (SQLite in production)
+CAUSE:  prisma.config.ts hardcoded SQLite path, ignoring DATABASE_URL
+FIX:    Update prisma.config.ts to check DATABASE_URL and use it when
+        it starts with postgresql://
+
+ISSUE 10: Railway "Config as Code" deprecation warning
+STATUS: Cosmetic only. railway.json works until 2026-12-01.
+        Migration to .railway/railway.ts is optional for now.
+
+================================================================================
+8. QUICK REFERENCE COMMANDS
+================================================================================
+
+--- Server ---
+cd enlace && railway up --service server          # Deploy to Railway
+cd enlace && railway logs --lines 20 --service server  # View logs
+cd enlace && railway status                       # Check status
+cd enlace && railway variables ls                 # List env vars
+
+--- Web ---
+git push                                          # Auto-deploys to Vercel
+# Or: vercel --prod                               # Manual deploy
+
+--- Typecheck ---
+cd enlace && pnpm typecheck                       # Check all packages
+
+--- Database ---
+cd enlace/apps/server && npx prisma db push --accept-data-loss  # Push schema
+cd enlace/apps/server && npx prisma generate                     # Regenerate client
+cd enlace/apps/server && npx tsx prisma/seed.ts                  # Seed database
+
+--- Local Development ---
+cd enlace/apps/server && PORT=3001 npx tsx src/index.ts         # Start API
+cd enlace/apps/web && pnpm dev                                  # Start web
+cd enlace/apps/mobile && npx expo start                         # Start mobile
+
+--- Git Workflow ---
+git add -A && git commit -m "fix: description" && git push      # Commit + push
+# Railway and Vercel auto-deploy from main branch
+
+--- Testing API ---
+curl -s https://server-production-XXXX.up.railway.app/api/health
+curl -s -X POST .../api/auth/login -H 'Content-Type: application/json' \
+  -d '{"email":"admin@enlace.com","password":"password123"}'
+
+================================================================================
+                    LESSONS LEARNED (Summary)
+================================================================================
+
+1. MONOREPO + VERCEL: Never put vercel.json at the monorepo root. Vercel's
+   auto-detection creates multi-service configs. Put it in apps/web/ and set
+   Root Directory to apps/web.
+
+2. MONOREPO + DOCKER: The Dockerfile must be at the project root and must
+   build @enlace/core before the server. Use --filter for workspace builds.
+
+3. PRISMA 7: Use prisma-client-js (not prisma-client) for Node.js production
+   deployments. The prisma-client generator produces .ts files that Node
+   can't run. Always copy generated client to dist/generated/.
+
+4. ESM MODULES: Never use CJS require() in .ts files. Use import statements
+   instead. The tsconfig uses "module": "ESNext".
+
+5. DATABASE SCHEMAS: Always copy the PostgreSQL schema in the Dockerfile,
+   not the local SQLite one. The Dockerfile.pg approach works.
+
+6. STARTUP SCRIPTS: Schema push + seed should run in the container startup
+   script (start.sh), not during the Docker build, because the database
+   isn't accessible during build time.
+
+7. ENVIRONMENT VARIABLES: Railway injects DATABASE_URL from the linked
+   PostgreSQL service. Vercel needs VITE_API_URL set manually in dashboard.
+
+8. HEALTH CHECKS: Set healthcheckTimeout to 120s for Railway, because
+   schema push + seed + server startup takes time on cold starts.
+
+================================================================================
+                          END OF DOCUMENT
+================================================================================
