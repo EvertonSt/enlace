@@ -26,7 +26,9 @@ COPY apps/server/tsconfig.json ./apps/server/
 COPY apps/server/src/ ./apps/server/src/
 COPY packages/core/src/ ./packages/core/src/
 COPY packages/core/package.json ./packages/core/
+COPY packages/core/tsconfig.json ./packages/core/
 COPY packages/config/ ./packages/config/
+RUN cd packages/core && pnpm build
 RUN cd apps/server && pnpm build
 
 # ── Stage 4: Production image ──────────────────────────────────────
@@ -43,6 +45,7 @@ RUN pnpm install --frozen-lockfile --prod --filter @enlace/server...
 
 # Copy built files
 COPY --from=build /app/apps/server/dist ./apps/server/dist
+COPY --from=build /app/packages/core/dist ./packages/core/dist
 COPY --from=prisma /app/apps/server/src/generated ./apps/server/src/generated
 COPY apps/server/prisma/schema.prisma ./apps/server/prisma/
 
