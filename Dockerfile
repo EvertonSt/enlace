@@ -12,7 +12,7 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/core/package.json ./packages/core/
 COPY packages/config/package.json ./packages/config/
-RUN pnpm install --frozen-lockfile --filter @enlace/server...
+RUN pnpm install --frozen-lockfile
 
 # ── Stage 2: Generate Prisma client for PostgreSQL ─────────────────
 FROM deps AS prisma
