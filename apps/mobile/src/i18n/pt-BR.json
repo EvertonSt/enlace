@@ -15,7 +15,8 @@
     "settings": "Configurações",
     "status": "Status",
     "confirm": "Confirmar",
-    "warning": "Atenção"
+    "warning": "Atenção",
+    "new": "NOVO"
   },
   "auth": {
     "login": "Entrar",
@@ -34,7 +35,8 @@
     "emailRequired": "E-mail é obrigatório",
     "invalidEmail": "Endereço de e-mail inválido",
     "passwordRequired": "Senha é obrigatória",
-    "passwordMinLength": "Mínimo de 6 caracteres"
+    "passwordMinLength": "Mínimo de 6 caracteres",
+    "confirmLogout": "Sair?"
   },
   "nav": {
     "dashboard": "Painel",
@@ -65,7 +67,9 @@
     "customersAffected": "{{count}} clientes afetados",
     "activeIncidents": "Incidentes Ativos ({{count}})",
     "resolvedIncidents": "Resolvidos ({{count}})",
-    "viewAll": "Ver Todos"
+    "viewAll": "Ver Todos",
+    "greeting": "Olá, {{name}}",
+    "price": "R$ {{price}}/mês"
   },
   "outage": {
     "title": "Mapa de Interrupções",
@@ -79,7 +83,10 @@
     "affectedCustomers": "{{count}} clientes afetados",
     "live": "Ao vivo",
     "offline": "Offline — dados em cache",
-    "eta": "Previsão"
+    "eta": "Previsão",
+    "newOutage": "Nova Interrupção Reportada",
+    "updated": "Interrupção Atualizada",
+    "affected": "afetados"
   },
   "ticket": {
     "title": "Chamados de Suporte",
@@ -169,5 +176,11 @@
     "label": "Idioma",
     "english": "English",
     "portuguese": "Português (BR)"
+  },
+  "time": {
+    "justNow": "agora",
+    "secondsAgo": "há {{count}}s",
+    "minutesAgo": "há {{count}}min",
+    "hoursAgo": "há {{count}}h"
   }
 }

@@ -48,13 +48,11 @@ async function saveStoredStatuses(statuses: Map<string, string>): Promise<void> 
   }
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  reported: 'Reported',
-  investigating: 'Investigating',
-  identified: 'Identified',
-  fix_in_progress: 'Fix in Progress',
-  resolved: 'Resolved',
-};
+import i18n from '../i18n';
+
+function getStatusLabel(status: string): string {
+  return i18n.t('outage.' + (status === 'fix_in_progress' ? 'fixInProgress' : status));
+}
 
 const STATUS_ICONS: Record<string, string> = {
   reported: '📡',
@@ -84,19 +82,19 @@ export async function checkAndNotify(outages: OutageEvent[]): Promise<number> {
 
     if (isNew || statusChanged) {
       const icon = STATUS_ICONS[outage.status] ?? '📢';
-      const statusLabel = STATUS_LABELS[outage.status] ?? outage.status;
+      const statusLabel = getStatusLabel(outage.status);
 
       let title: string;
       let body: string;
 
       if (isNew) {
-        title = `${icon} New Outage Reported`;
+        title = `${icon} ${i18n.t('outage.newOutage')}`;
         body = `${outage.title} — ${outage.affectedArea}`;
         if (outage.affectedCustomerCount > 0) {
-          body += ` (${outage.affectedCustomerCount.toLocaleString()} affected)`;
+          body += ` (${outage.affectedCustomerCount.toLocaleString()} ${i18n.t('outage.affected')})`;
         }
       } else {
-        title = `${icon} Outage Updated`;
+        title = `${icon} ${i18n.t('outage.updated')}`;
         body = `${outage.title} → ${statusLabel}`;
       }
 

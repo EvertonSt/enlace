@@ -15,6 +15,8 @@ async function getInitialLanguage(): Promise<string> {
   return 'en'; // Phase 2: detect device locale
 }
 
+export default i18n;
+
 void (async () => {
   const lng = await getInitialLanguage();
 

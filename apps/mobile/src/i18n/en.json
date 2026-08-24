@@ -15,7 +15,8 @@
     "settings": "Settings",
     "status": "Status",
     "confirm": "Confirm",
-    "warning": "Warning"
+    "warning": "Warning",
+    "new": "NEW"
   },
   "auth": {
     "login": "Log In",
@@ -34,7 +35,8 @@
     "emailRequired": "Email is required",
     "invalidEmail": "Invalid email address",
     "passwordRequired": "Password is required",
-    "passwordMinLength": "Minimum 6 characters"
+    "passwordMinLength": "Minimum 6 characters",
+    "confirmLogout": "Sign out?"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -65,7 +67,9 @@
     "customersAffected": "{{count}} customers affected",
     "activeIncidents": "Active Incidents ({{count}})",
     "resolvedIncidents": "Resolved ({{count}})",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "greeting": "Hello, {{name}}",
+    "price": "R$ {{price}}/mo"
   },
   "outage": {
     "title": "Outage Map",
@@ -79,7 +83,10 @@
     "affectedCustomers": "{{count}} customers affected",
     "live": "Live",
     "offline": "Offline — cached data",
-    "eta": "ETA"
+    "eta": "ETA",
+    "newOutage": "New Outage Reported",
+    "updated": "Outage Updated",
+    "affected": "affected"
   },
   "ticket": {
     "title": "Support Tickets",
@@ -169,5 +176,11 @@
     "label": "Language",
     "english": "English",
     "portuguese": "Português (BR)"
+  },
+  "time": {
+    "justNow": "just now",
+    "secondsAgo": "{{count}}s ago",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago"
   }
 }

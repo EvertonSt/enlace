@@ -61,7 +61,7 @@ export default function DashboardScreen() {
   }, [refreshing, loadUserData]);
 
   const activeOutages = outages.filter((o) => o.status !== 'resolved');
-  const timeAgo = lastUpdated ? getTimeAgo(lastUpdated) : '';
+  const timeAgo = lastUpdated ? getTimeAgo(lastUpdated, t) : '';
 
   if (loading) {
     return (
@@ -73,9 +73,9 @@ export default function DashboardScreen() {
   }
 
   function handleLogout() {
-    Alert.alert('Logout', 'Sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: () => logout() },
+    Alert.alert(t('auth.logout'), t('auth.confirmLogout'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('auth.logout'), style: 'destructive', onPress: () => logout() },
     ]);
   }
 
@@ -84,7 +84,7 @@ export default function DashboardScreen() {
       <View style={c.headerRow}>
         <View style={{ flex: 1 }}>
           <Text style={c.title}>{t('dashboard.title')}</Text>
-          {user && <Text style={c.greeting}>Olá, {user.name?.split(' ')[0] ?? 'User'} 👋</Text>}
+          {user && <Text style={c.greeting}>{t('dashboard.greeting', { name: user.name?.split(' ')[0] ?? '' })} 👋</Text>}
         </View>
         <TouchableOpacity onPress={handleLogout} style={c.logoutBtn}>
           <Text style={c.logoutText}>{t('auth.logout')}</Text>
@@ -96,7 +96,7 @@ export default function DashboardScreen() {
         <Text style={c.label}>{t('dashboard.currentPlan')}</Text>
         <Text style={c.value}>{plan?.name ?? 'N/A'}</Text>
         <Text style={c.sub}>{plan ? `${plan.speedMbps} Mbps — ${t('dashboard.planDetails.unlimited')}` : ''}</Text>
-        {plan && <Text style={c.price}>R$ {plan.price.toFixed(2).replace('.', ',')}/mês</Text>}
+        {plan && <Text style={c.price}>{t('dashboard.price', { price: plan.price.toFixed(2).replace('.', ',') })}</Text>}
       </View>
 
       {/* Data Usage */}
@@ -122,11 +122,11 @@ export default function DashboardScreen() {
         <View style={c.outageHeader}>
           <View style={{ flex: 1 }}>
             <Text style={c.label}>{t('dashboard.activeOutages')}</Text>
-            {timeAgo && <Text style={c.pollTime}>🟢 Live • {timeAgo}</Text>}
+            {timeAgo && <Text style={c.pollTime}>🟢 {t('common.live')} • {timeAgo}</Text>}
           </View>
           {hasNewChanges && (
             <TouchableOpacity onPress={clearChanges} style={c.newBadge}>
-              <Text style={c.newBadgeText}>NEW</Text>
+              <Text style={c.newBadgeText}>{t('common.new')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -155,14 +155,14 @@ export default function DashboardScreen() {
 
 const STATUS_COLORS: Record<string, string> = { fix_in_progress: '#3b82f6', investigating: '#ef4444', identified: '#f97316', reported: '#eab308', resolved: '#22c55e' };
 
-function getTimeAgo(date: Date): string {
+function getTimeAgo(date: Date, t: (key: string, opts?: any) => string): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (seconds < 10) return 'just now';
-  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 10) return t('time.justNow');
+  if (seconds < 60) return t('time.secondsAgo', { count: String(seconds) });
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t('time.minutesAgo', { count: String(minutes) });
   const hours = Math.floor(minutes / 60);
-  return `${hours}h ago`;
+  return t('time.hoursAgo', { count: String(hours) });
 }
 
 const s = (dark: boolean) => StyleSheet.create({
