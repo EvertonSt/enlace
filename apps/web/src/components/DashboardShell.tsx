@@ -91,6 +91,10 @@ export default function DashboardShell() {
 
         {/* Page content with scroll shadow */}
         <main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 dark:bg-gray-950">
+        {/* Demo Mode Banner */}
+        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-center text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+          {t("common.demoMode")}
+        </div>
           <Outlet />
         </main>
       </div>

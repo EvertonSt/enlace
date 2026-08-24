@@ -15,7 +15,9 @@
     "settings": "Configurações",
     "status": "Status",
     "confirm": "Confirmar",
-    "warning": "Atenção"
+    "warning": "Atenção",
+    "demoMode": "Modo demonstração — dados sintéticos; conectividade com o backend não está habilitada.",
+    "demo": "Demonstração"
   },
   "auth": {
     "login": "Entrar",

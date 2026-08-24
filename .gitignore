@@ -48,3 +48,5 @@ TURBO_CACHE_DIR/
 *.aab
 *.apk
 enlace/
+
+.vercel

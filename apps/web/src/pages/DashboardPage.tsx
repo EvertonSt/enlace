@@ -69,7 +69,7 @@ export default function DashboardPage() {
       >
         <motion.h1 variants={fadeUp} className="text-2xl font-bold text-gray-900 dark:text-white">
           {t('dashboard.title')}
-          {isDemo && <span className="ml-2 text-sm font-normal text-gray-400">(Demo)</span>}
+          {isDemo && <span className="ml-2 text-sm font-normal text-gray-400">({t("common.demo")})</span>}
         </motion.h1>
 
         {/* Cards */}

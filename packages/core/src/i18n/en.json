@@ -15,7 +15,9 @@
     "settings": "Settings",
     "status": "Status",
     "confirm": "Confirm",
-    "warning": "Warning"
+    "warning": "Warning",
+    "demoMode": "Demo mode — synthetic data; backend connectivity is not enabled.",
+    "demo": "Demo"
   },
   "auth": {
     "login": "Log In",
