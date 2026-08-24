@@ -62,27 +62,27 @@ async function main() {
   const plans = await Promise.all([
     prisma.plan.upsert({
       where: { id: 'plan-basico' },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: { id: 'plan-basico', name: 'Fibra Básico 100 Mbps', speedMbps: 100, dataCapGb: 500, price: 59.9, currency: 'BRL' },
     }),
     prisma.plan.upsert({
       where: { id: 'plan-standard' },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: { id: 'plan-standard', name: 'Fibra Standard 200 Mbps', speedMbps: 200, dataCapGb: null, price: 89.9, currency: 'BRL' },
     }),
     prisma.plan.upsert({
       where: { id: 'plan-premium' },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: { id: 'plan-premium', name: 'Fibra Premium 300 Mbps', speedMbps: 300, dataCapGb: null, price: 119.9, currency: 'BRL' },
     }),
     prisma.plan.upsert({
       where: { id: 'plan-ultra' },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: { id: 'plan-ultra', name: 'Fibra Ultra 500 Mbps', speedMbps: 500, dataCapGb: null, price: 169.9, currency: 'BRL' },
     }),
     prisma.plan.upsert({
       where: { id: 'plan-business' },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: { id: 'plan-business', name: 'Business 1 Gbps', speedMbps: 1000, dataCapGb: null, price: 399.9, currency: 'BRL' },
     }),
   ]);
@@ -96,7 +96,7 @@ async function main() {
   const password = await bcrypt.hash('password123', 12);
   await prisma.user.upsert({
     where: { email: 'admin@enlace.com' },
-    update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+    update: {},
     create: { id: 'user-staff', email: 'admin@enlace.com', password, name: 'NOC Admin', role: 'staff' },
   });
 
@@ -122,12 +122,12 @@ async function main() {
   for (const c of customerData) {
     await prisma.user.upsert({
       where: { email: c.email },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: { id: c.id, email: c.email, password, name: c.name, role: 'customer' },
     });
     const cust = await prisma.customer.upsert({
       where: { id: c.custId },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: { id: c.custId, userId: c.id, name: c.name, email: c.email, phone: c.phone, address: c.address, planId: c.planId },
     });
     customers.push(cust);
@@ -227,7 +227,7 @@ async function main() {
   for (const o of outageData) {
     await prisma.outageEvent.upsert({
       where: { id: o.id },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: { title: o.title, description: o.description, status: o.status, affectedArea: o.area, affectedCustomerCount: o.count },
       create: {
         id: o.id,
         title: o.title,
@@ -255,7 +255,7 @@ async function main() {
     // Current month (pending)
     await prisma.invoice.upsert({
       where: { id: `inv-${String(i + 1).padStart(3, '0')}-current` },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: {
         id: `inv-${String(i + 1).padStart(3, '0')}-current`,
         customerId: cust.id,
@@ -270,7 +270,7 @@ async function main() {
     // Last month (paid)
     await prisma.invoice.upsert({
       where: { id: `inv-${String(i + 1).padStart(3, '0')}-prev` },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: {
         id: `inv-${String(i + 1).padStart(3, '0')}-prev`,
         customerId: cust.id,
@@ -289,19 +289,19 @@ async function main() {
   // Technicians (4)
   // =====================================================================
   const tech1 = await prisma.technician.upsert({
-    where: { id: 'tech-001' }, update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+    where: { id: 'tech-001' }, update: {},
     create: { id: 'tech-001', name: 'Lucas Ferreira', phone: '+55 73 91111-1111', email: 'lucas@enlace.com', area: 'Centro', status: 'available', rating: 4.8, completedToday: 3 },
   });
   const tech2 = await prisma.technician.upsert({
-    where: { id: 'tech-002' }, update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+    where: { id: 'tech-002' }, update: {},
     create: { id: 'tech-002', name: 'Diego Souza', phone: '+55 73 92222-2222', email: 'diego@enlace.com', area: 'Centro', status: 'on_job', rating: 4.6, completedToday: 2 },
   });
   const tech3 = await prisma.technician.upsert({
-    where: { id: 'tech-003' }, update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+    where: { id: 'tech-003' }, update: {},
     create: { id: 'tech-003', name: 'Camila Rodrigues', phone: '+55 73 93333-3333', email: 'camila@enlace.com', area: 'Centro', status: 'on_job', rating: 4.9, completedToday: 4 },
   });
   const tech4 = await prisma.technician.upsert({
-    where: { id: 'tech-004' }, update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+    where: { id: 'tech-004' }, update: {},
     create: { id: 'tech-004', name: 'Thiago Mendes', phone: '+55 73 94444-4444', email: 'thiago@enlace.com', area: 'Lagoa Preta', status: 'off_duty', rating: 4.5, completedToday: 0 },
   });
 
@@ -322,7 +322,7 @@ async function main() {
   for (const j of jobData) {
     await prisma.technicianJob.upsert({
       where: { ticketId: j.ticketId },
-      update: { subject: tk.subject, body: tk.body, status: tk.status, priority: tk.priority, category: tk.category },
+      update: {},
       create: {
         ticketId: j.ticketId,
         technicianId: j.techId,
