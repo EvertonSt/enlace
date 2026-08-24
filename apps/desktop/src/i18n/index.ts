@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { translations } from './i18n/translations';
+import { translations, type TranslationKey } from './translations';
 
 const STORAGE_KEY = 'enlace-noc-lang';
 
@@ -30,3 +30,5 @@ i18n.on('languageChanged', (lng: string) => {
 });
 
 export default i18n;
+export { translations };
+export type { TranslationKey };

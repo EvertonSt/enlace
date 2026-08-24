@@ -1,3 +1,11 @@
+function formatDate(iso: string, locale: string): string {
+  const d = new Date(iso);
+  if (locale === 'pt-BR') {
+    return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+  return d.toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -10,7 +18,7 @@ const stagger = { animate: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
 
 export default function NocDashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { apiFetch } = useAuth();
   const [initialOutages, setInitialOutages] = useState<OutageEvent[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -48,16 +56,16 @@ export default function NocDashboard() {
         <h1 className="text-2xl font-bold">{t('dashboard.title')}</h1>
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
-          <span className="text-xs text-gray-400">{connected ? 'Live' : 'Offline'}</span>
+          <span className="text-xs text-gray-400">{connected ? t('common.live') : t('common.offline')}</span>
         </div>
       </motion.div>
 
       <motion.div variants={fadeUp} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: 'Active Incidents', value: loading ? '...' : String(active.length), color: 'bg-red-900/30 text-red-400' },
-          { label: 'Open Tickets', value: loading ? '...' : String(openTickets), color: 'bg-blue-900/30 text-blue-400' },
-          { label: 'Customers Affected', value: loading ? '...' : formatNumber(totalAffected), color: 'bg-orange-900/30 text-orange-400' },
-          { label: 'Avg Response', value: '12 min', color: 'bg-green-900/30 text-green-400' },
+          { label: t('dashboard.activeIncidents'), value: loading ? '...' : String(active.length), color: 'bg-red-900/30 text-red-400' },
+          { label: t('dashboard.openTickets'), value: loading ? '...' : String(openTickets), color: 'bg-blue-900/30 text-blue-400' },
+          { label: t('dashboard.customersAffected'), value: loading ? '...' : formatNumber(totalAffected), color: 'bg-orange-900/30 text-orange-400' },
+          { label: t('dashboard.avgResponse'), value: '12 min', color: 'bg-green-900/30 text-green-400' },
         ].map((card) => (
           <div key={card.label} className={`rounded-xl p-5 ${card.color}`}>
             <div className="text-sm opacity-80">{card.label}</div>
@@ -88,14 +96,14 @@ export default function NocDashboard() {
                   {outage.description && <div className="mt-1 text-xs text-gray-500 line-clamp-2">{outage.description}</div>}
                 </div>
                 <div className="text-right text-xs text-gray-500">
-                  <div>{formatDateTime(outage.startedAt)}</div>
+                  <div>{formatDate(outage.startedAt, i18n.language)}</div>
                   <span className={`mt-1 inline-block rounded-full px-2 py-0.5 ${
                     outage.status === 'fix_in_progress' ? 'bg-blue-900/50 text-blue-300' :
                     outage.status === 'resolved' ? 'bg-green-900/50 text-green-300' :
                     outage.status === 'investigating' ? 'bg-red-900/50 text-red-300' :
                     'bg-yellow-900/50 text-yellow-300'
                   }`}>
-                    {outage.status.replace('_', ' ')}
+                    {t('status.' + outage.status)}
                   </span>
                 </div>
               </div>

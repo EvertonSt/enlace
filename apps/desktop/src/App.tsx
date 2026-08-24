@@ -34,7 +34,7 @@ function Sidebar() {
       <div className="border-t border-gray-800 p-3 space-y-2">
         <button onClick={() => i18n.changeLanguage(i18n.language === 'pt-BR' ? 'en' : 'pt-BR')}
           className="w-full rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white">
-          {i18n.language === 'pt-BR' ? '🇺🇸 EN' : '🇧🇷 PT'}
+          {i18n.language === 'pt-BR' ? '🇺🇸 US EN' : '🇧🇷 BR PT'}
         </button>
         {user && (
           <div className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-800/50">

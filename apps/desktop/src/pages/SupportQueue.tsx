@@ -91,7 +91,7 @@ export default function SupportQueue() {
           className="flex-1 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm text-white placeholder-gray-500 focus:border-brand-500 focus:outline-none"
           placeholder="Search tickets..." />
         <div className="flex gap-2">
-          {['all', 'open', 'in_progress', 'resolved'].map((f) => (
+          {['all', t('status.open'), t('status.in_progress'), t('status.resolved')].map((f) => (
             <button key={f} onClick={() => setFilter(f)}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${filter === f ? 'bg-brand-600/30 text-brand-400' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>
               {f === 'all' ? 'All' : f.replace('_', ' ')}

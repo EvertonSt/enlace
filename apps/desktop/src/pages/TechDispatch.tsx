@@ -137,7 +137,7 @@ export default function TechDispatch() {
               )}
               {openTickets.map((tk) => {
                 const triage = tk.aiTriage as Record<string, unknown> | null;
-                const availableTech = technicians.find((t) => t.status === 'available');
+                const availableTech = technicians.find((tech) => tech.status === 'available');
                 return (
                   <div key={tk.id} className="rounded-lg border border-gray-700 bg-gray-900 p-4">
                     <div className="flex items-center justify-between">
