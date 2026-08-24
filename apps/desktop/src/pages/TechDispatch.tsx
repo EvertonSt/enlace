@@ -67,9 +67,9 @@ export default function TechDispatch() {
       setTechnicians(techs);
       setTickets(tk);
       const tech = technicians.find((t) => t.id === techId);
-      toast.success('Technician assigned', { description: `Job dispatched to ${tech?.name ?? 'Unknown'}` });
+      toast.success(t('tech.assigned'), { description: t('tech.assignedDesc') + ' ' + (tech?.name ?? t('tech.unknown')) });
     } catch (err) {
-      toast.error('Failed to assign', { description: err instanceof Error ? err.message : 'Unknown error' });
+      toast.error(t('tech.assignFailed'), { description: err instanceof Error ? err.message : t('tech.unknown') });
     }
   }
 
@@ -81,7 +81,7 @@ export default function TechDispatch() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-5">
-          <h2 className="mb-4 text-lg font-semibold">Field Technicians</h2>
+          <h2 className="mb-4 text-lg font-semibold">{t('tech.fieldTechnicians')}</h2>
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
@@ -91,7 +91,7 @@ export default function TechDispatch() {
           ) : (
             <div className="space-y-3">
               {technicians.length === 0 && (
-                <div className="py-8 text-center text-gray-500">No technicians found</div>
+                <div className="py-8 text-center text-gray-500">{t('tech.noTechnicians')}</div>
               )}
               {technicians.map((tech) => (
                 <div key={tech.id} className="rounded-lg border border-gray-700 bg-gray-900 p-4">
@@ -100,20 +100,20 @@ export default function TechDispatch() {
                       <div className="flex items-center gap-2">
                         <span className="text-lg">👤</span>
                         <span className="font-medium text-white">{tech.name}</span>
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[tech.status] ?? 'bg-gray-700 text-gray-400'}`}>{tech.status.replace('_', ' ')}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[tech.status] ?? 'bg-gray-700 text-gray-400'}`}>{t('status.' + tech.status)}</span>
                       </div>
                       <div className="mt-1 text-xs text-gray-500">{tech.area} • {tech.phone ?? 'N/A'}</div>
                     </div>
                     <div className="text-right text-xs text-gray-500">
                       <div>⭐ {tech.rating}</div>
-                      <div>{tech.completedToday} done today</div>
+                      <div>{tech.completedToday} {t('common.doneToday')}</div>
                     </div>
                   </div>
                   {tech.currentJob && (
                     <div className="mt-3 rounded-lg bg-gray-800 p-3 text-xs text-gray-400">
-                      <div className="font-medium text-white">Current Job — {tech.currentJob.customer}</div>
+                      <div className="font-medium text-white">{t('tech.currentJob')} — {tech.currentJob.customer}</div>
                       <div>{tech.currentJob.address}</div>
-                      {tech.currentJob.eta && <div className="text-blue-400">ETA: {tech.currentJob.eta}</div>}
+                      {tech.currentJob.eta && <div className="text-blue-400">{t('common.eta')}: {tech.currentJob.eta}</div>}
                     </div>
                   )}
                 </div>
@@ -123,7 +123,7 @@ export default function TechDispatch() {
         </div>
 
         <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-5">
-          <h2 className="mb-4 text-lg font-semibold">Unassigned Jobs</h2>
+          <h2 className="mb-4 text-lg font-semibold">{t('tech.unassignedJobs')}</h2>
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
@@ -133,7 +133,7 @@ export default function TechDispatch() {
           ) : (
             <div className="space-y-3">
               {openTickets.length === 0 && (
-                <div className="py-8 text-center text-gray-500">No open tickets</div>
+                <div className="py-8 text-center text-gray-500">{t('tech.noOpenTickets')}</div>
               )}
               {openTickets.map((tk) => {
                 const triage = tk.aiTriage as Record<string, unknown> | null;
@@ -143,7 +143,7 @@ export default function TechDispatch() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-medium text-white">{tk.subject}</div>
-                        <div className="text-xs text-gray-500">{tk.category} • Priority: {tk.priority}</div>
+                        <div className="text-xs text-gray-500">{tk.category} • {t('common.priority')}: {tk.priority}</div>
                       </div>
                       {triage && (
                         <span className="rounded-full bg-red-900/50 px-2 py-0.5 text-[10px] font-bold text-red-300">⚡ {(triage.urgency as number)}/5</span>
@@ -153,11 +153,11 @@ export default function TechDispatch() {
                     {availableTech && (
                       <button onClick={() => handleAssign(availableTech.id, tk.id)}
                         className="mt-3 w-full rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-500 transition-colors">
-                        Assign to {availableTech.name}
+                        {t('tech.assignTo')} {availableTech.name}
                       </button>
                     )}
                     {!availableTech && (
-                      <div className="mt-3 text-xs text-gray-500">No available technicians</div>
+                      <div className="mt-3 text-xs text-gray-500">{t('tech.noAvailable')}</div>
                     )}
                   </div>
                 );

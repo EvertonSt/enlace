@@ -75,7 +75,7 @@ export default function NocDashboard() {
       </motion.div>
 
       <motion.div variants={fadeUp} className="rounded-xl border border-gray-800 bg-gray-800/50 p-5">
-        <h2 className="mb-4 text-lg font-semibold">Incident Timeline</h2>
+        <h2 className="mb-4 text-lg font-semibold">{t('dashboard.incidentTimeline')}</h2>
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -85,14 +85,14 @@ export default function NocDashboard() {
         ) : (
           <div className="space-y-3">
             {outages.length === 0 && (
-              <div className="py-8 text-center text-gray-500">No outages recorded</div>
+              <div className="py-8 text-center text-gray-500">{t('dashboard.noOutages')}</div>
             )}
             {outages.map((outage) => (
               <div key={outage.id} className="flex items-start gap-3 rounded-lg border border-gray-700 bg-gray-900 p-4 transition-colors hover:border-gray-600">
                 <span className="text-xl">{outage.status === 'fix_in_progress' ? '🔧' : outage.status === 'resolved' ? '✅' : '🔍'}</span>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium">{outage.title}</div>
-                  <div className="mt-0.5 text-sm text-gray-400">{outage.affectedArea} — {formatNumber(outage.affectedCustomerCount ?? 0)} affected</div>
+                  <div className="mt-0.5 text-sm text-gray-400">{outage.affectedArea} — {formatNumber(outage.affectedCustomerCount ?? 0)} {t('dashboard.affected')}</div>
                   {outage.description && <div className="mt-1 text-xs text-gray-500 line-clamp-2">{outage.description}</div>}
                 </div>
                 <div className="text-right text-xs text-gray-500">

@@ -39,7 +39,7 @@ function Sidebar() {
         {user && (
           <div className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-800/50">
             <span className="text-xs text-gray-400 truncate">{user.name}</span>
-            <button onClick={logout} className="text-xs text-red-400 hover:text-red-300">Logout</button>
+            <button onClick={logout} className="text-xs text-red-400 hover:text-red-300">{t('common.logout')}</button>
           </div>
         )}
       </div>
@@ -71,6 +71,7 @@ function AnimatedRoutes() {
 }
 
 function AuthGate() {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -78,7 +79,7 @@ function AuthGate() {
       <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
         <div className="text-center">
           <div className="mb-4 text-4xl">🖥️</div>
-          <div className="text-gray-400">Loading...</div>
+          <div className="text-gray-400">{t('common.loading')}</div>
         </div>
       </div>
     );

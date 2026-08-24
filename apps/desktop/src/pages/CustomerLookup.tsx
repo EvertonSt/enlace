@@ -58,24 +58,24 @@ export default function CustomerLookup() {
       <h1 className="text-2xl font-bold">{t('nav.customerLookup', 'Customer Lookup')}</h1>
       <input value={search} onChange={(e) => setSearch(e.target.value)}
         className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm text-white placeholder-gray-500 focus:border-brand-500 focus:outline-none"
-        placeholder="Search by name, email, phone, or ID..." />
+        placeholder={t('customer.searchPlaceholder')} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-2 lg:col-span-1">
           {loading ? (
             [1, 2, 3].map((i) => <div key={i} className="h-20 animate-pulse rounded-lg bg-gray-700/50" />)
           ) : results.length === 0 ? (
-            <div className="py-8 text-center text-gray-500">No customers found</div>
+            <div className="py-8 text-center text-gray-500">{t('customer.noResults')}</div>
           ) : (
             results.map((c) => (
               <div key={c.id} onClick={() => setSelected(c.id)}
                 className={`cursor-pointer rounded-lg border p-3 transition-all ${selected === c.id ? 'border-brand-500 bg-brand-950/30' : 'border-gray-800 bg-gray-800/50 hover:border-gray-700'}`}>
                 <div className="font-medium text-white">{c.name}</div>
-                <div className="text-xs text-gray-400">{c.plan?.name ?? 'Unknown plan'}</div>
+                <div className="text-xs text-gray-400">{c.plan?.name ?? t('customer.unknownPlan')}</div>
                 <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
-                  <span>{tickets.filter((tk) => tk.customerId === c.id).length} tickets</span>
+                  <span>{tickets.filter((tk) => tk.customerId === c.id).length + ' ' + t('customer.tickets').toLowerCase()}</span>
                   <span>•</span>
-                  <span>Since {formatDate(c.createdAt)}</span>
+                  <span>{t('common.since')} {formatDate(c.createdAt)}</span>
                 </div>
               </div>
             ))
@@ -92,15 +92,15 @@ export default function CustomerLookup() {
                 <span className="inline-block rounded-full bg-green-900/50 px-2 py-0.5 text-xs text-green-300">{customer.status}</span>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><span className="text-gray-500">Email:</span> <span className="text-white">{customer.email}</span></div>
-                <div><span className="text-gray-500">Phone:</span> <span className="text-white">{customer.phone ?? 'N/A'}</span></div>
-                <div><span className="text-gray-500">Plan:</span> <span className="text-white">{customer.plan?.name ?? 'Unknown'}</span></div>
-                <div><span className="text-gray-500">Customer since:</span> <span className="text-white">{formatDate(customer.createdAt)}</span></div>
-                <div className="col-span-2"><span className="text-gray-500">Address:</span> <span className="text-white">{customer.address ?? 'N/A'}</span></div>
+                <div><span className="text-gray-500">{t('common.email')}:</span> <span className="text-white">{customer.email}</span></div>
+                <div><span className="text-gray-500">{t('common.phone')}:</span> <span className="text-white">{customer.phone ?? 'N/A'}</span></div>
+                <div><span className="text-gray-500">{t('common.plan')}:</span> <span className="text-white">{customer.plan?.name ?? t('common.unknown')}</span></div>
+                <div><span className="text-gray-500">{t('customer.since')}:</span> <span className="text-white">{formatDate(customer.createdAt)}</span></div>
+                <div className="col-span-2"><span className="text-gray-500">{t('common.address')}:</span> <span className="text-white">{customer.address ?? 'N/A'}</span></div>
               </div>
 
               <div>
-                <h3 className="mb-2 text-sm font-medium text-gray-400">Ticket History ({customerTickets.length})</h3>
+                <h3 className="mb-2 text-sm font-medium text-gray-400">{t('ticket.customerHistory')} ({customerTickets.length})</h3>
                 <div className="space-y-2">
                   {customerTickets.map((tk) => (
                     <div key={tk.id} className="rounded-lg border border-gray-700 bg-gray-900 p-3">
@@ -111,12 +111,12 @@ export default function CustomerLookup() {
                       <div className="mt-1 text-xs text-gray-500">{tk.category} • {formatDate(tk.createdAt)}</div>
                     </div>
                   ))}
-                  {customerTickets.length === 0 && <div className="text-sm text-gray-500">No tickets</div>}
+                  {customerTickets.length === 0 && <div className="text-sm text-gray-500">{t('customer.noTickets')}</div>}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex h-64 items-center justify-center text-gray-500">Select a customer to view details</div>
+            <div className="flex h-64 items-center justify-center text-gray-500">{t('customer.selectToView')}</div>
           )}
         </div>
       </div>

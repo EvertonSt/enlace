@@ -67,9 +67,9 @@ export default function SupportQueue() {
         body: JSON.stringify({ status: newStatus }),
       });
       // WebSocket will broadcast the update to all clients
-      toast.success('Ticket updated', { description: `Status changed to ${newStatus}` });
+      toast.success(t('ticket.updated'), { description: t('ticket.updatedDesc') + ' ' + newStatus });
     } catch {
-      toast.error('Failed to update ticket');
+      toast.error(t('ticket.updateFailed'));
     }
   }
 
@@ -77,24 +77,24 @@ export default function SupportQueue() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">Support Queue</h1>
+          <h1 className="text-2xl font-bold">{t('nav.tickets')}</h1>
           <div className="flex items-center gap-1.5">
             <span className={`h-2 w-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-xs text-gray-400">{connected ? 'Live' : 'Offline'}</span>
+            <span className="text-xs text-gray-400">{connected ? t('common.live') : t('common.offline')}</span>
           </div>
         </div>
-        <span className="text-sm text-gray-400">{loading ? '...' : `${filtered.length} tickets`}</span>
+        <span className="text-sm text-gray-400">{loading ? '...' : `${filtered.length} {t('nav.tickets').toLowerCase()}`}</span>
       </div>
 
       <div className="flex gap-3">
         <input value={search} onChange={(e) => setSearch(e.target.value)}
           className="flex-1 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm text-white placeholder-gray-500 focus:border-brand-500 focus:outline-none"
-          placeholder="Search tickets..." />
+          placeholder={t('ticket.searchPlaceholder')} />
         <div className="flex gap-2">
           {['all', t('status.open'), t('status.in_progress'), t('status.resolved')].map((f) => (
             <button key={f} onClick={() => setFilter(f)}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${filter === f ? 'bg-brand-600/30 text-brand-400' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>
-              {f === 'all' ? 'All' : f.replace('_', ' ')}
+              {f === 'all' ? t('common.all') : f.replace('_', ' ')}
             </button>
           ))}
         </div>
@@ -128,7 +128,7 @@ export default function SupportQueue() {
                     <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
                       {triage && <span>🤖 {triage.provider} ({triage.category})</span>}
                       {triage && <span>•</span>}
-                      <span>{tk.customer?.name ?? 'Unknown'}</span>
+                      <span>{tk.customer?.name ?? t('ticket.unknown')}</span>
                       <span>•</span>
                       <span>{formatDate(tk.createdAt)}</span>
                     </div>
@@ -142,13 +142,13 @@ export default function SupportQueue() {
                           <div className="text-sm text-gray-300">{tk.body}</div>
                           {triage?.suggestedResponse && (
                             <div className="rounded-lg border border-brand-800 bg-brand-950/30 p-3">
-                              <div className="text-xs font-medium text-brand-400 mb-1">AI Suggested Response:</div>
+                              <div className="text-xs font-medium text-brand-400 mb-1">{t('ticket.aiSuggestedResponse')}</div>
                               <p className="text-sm text-gray-300">{triage.suggestedResponse}</p>
                               <div className="mt-2 flex gap-2">
-                                <button onClick={(e) => { e.stopPropagation(); toast.success('Response approved'); }}
-                                  className="rounded-md bg-brand-600 px-3 py-1 text-xs font-semibold text-white hover:bg-brand-500">✓ Approve & Send</button>
+                                <button onClick={(e) => { e.stopPropagation(); toast.success(t('ticket.approved')); }}
+                                  className="rounded-md bg-brand-600 px-3 py-1 text-xs font-semibold text-white hover:bg-brand-500">{t('ticket.approveSend')}</button>
                                 <button onClick={(e) => e.stopPropagation()}
-                                  className="rounded-md border border-gray-700 px-3 py-1 text-xs text-gray-300 hover:bg-gray-800">✏️ Edit</button>
+                                  className="rounded-md border border-gray-700 px-3 py-1 text-xs text-gray-300 hover:bg-gray-800">{t('ticket.edit')}</button>
                               </div>
                             </div>
                           )}
