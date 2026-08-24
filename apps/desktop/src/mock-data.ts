@@ -3,8 +3,8 @@ import type { OutageEvent, Ticket } from '@enlace/core';
 export const MOCK_OUTAGES: OutageEvent[] = [
   {
     "id": "o1",
-    "title": "Fiber backbone cut — Centro",
-    "description": "Construction crew severed 48-strand fiber.",
+    "title": "Corte de fibra — Centro",
+    "description": "Equipe de construção cortou trunk de fibra de 48 fibras.",
     "status": "fix_in_progress",
     "affectedArea": "Centro",
     "affectedCustomerCount": 1247,
@@ -15,8 +15,8 @@ export const MOCK_OUTAGES: OutageEvent[] = [
   },
   {
     "id": "o2",
-    "title": "Power outage — Lagoa Preta substation",
-    "description": "Local substation lost power.",
+    "title": "Queda de energia — Subestação Lagoa Preta",
+    "description": "Subestação local perdeu energia.",
     "status": "identified",
     "affectedArea": "Lagoa Preta",
     "affectedCustomerCount": 432,
@@ -27,8 +27,8 @@ export const MOCK_OUTAGES: OutageEvent[] = [
   },
   {
     "id": "o3",
-    "title": "DNS resolution delays",
-    "description": "Intermittent DNS timeout reports.",
+    "title": "Atrasos na resolução de DNS",
+    "description": "Relatórios intermitentes de timeout de DNS.",
     "status": "investigating",
     "affectedArea": "Centro",
     "affectedCustomerCount": 89,
@@ -39,8 +39,8 @@ export const MOCK_OUTAGES: OutageEvent[] = [
   },
   {
     "id": "o4",
-    "title": "Scheduled maintenance — Lagoa Preta OLT",
-    "description": "Planned firmware upgrade on OLT-07.",
+    "title": "Manutenção programada — OLT Lagoa Preta",
+    "description": "Atualização de firmware planejada no OLT-07.",
     "status": "reported",
     "affectedArea": "Lagoa Preta",
     "affectedCustomerCount": 312,
@@ -51,8 +51,8 @@ export const MOCK_OUTAGES: OutageEvent[] = [
   },
   {
     "id": "o5",
-    "title": "Router crash — Centro POP",
-    "description": "BNG router rebooted after memory leak.",
+    "title": "Falha no roteador — POP Centro",
+    "description": "Roteador BNG reiniciado após vazamento de memória.",
     "status": "resolved",
     "affectedArea": "Centro",
     "affectedCustomerCount": 567,
@@ -66,8 +66,8 @@ export const MOCK_OUTAGES: OutageEvent[] = [
 export const MOCK_TICKETS: Ticket[] = [
   {
     "id": "t1",
-    "subject": "Internet completely down since morning",
-    "body": "Without internet since 7am. Critical for work from home.",
+    "subject": "Internet completamente fora desde a manhã",
+    "body": "Sem internet desde as 7h. Crítico para trabalho remoto.",
     "status": "open",
     "priority": "high",
     "category": "outage",
@@ -78,7 +78,7 @@ export const MOCK_TICKETS: Ticket[] = [
     "aiTriage": {
       "urgency": 5,
       "category": "outage",
-      "suggestedResponse": "NOC team alerted. Technician dispatched. ETA 2 hours.",
+      "suggestedResponse": "Equipe NOC alertada. Técnico despachado. ETA 2 horas.",
       "provider": "claude",
       "model": "claude-sonnet-4-20250514",
       "confidence": 0.94,
@@ -87,8 +87,8 @@ export const MOCK_TICKETS: Ticket[] = [
   },
   {
     "id": "t2",
-    "subject": "Billing discrepancy on last invoice",
-    "body": "Invoice shows R$ 189,90 but plan is R$ 119,90.",
+    "subject": "Discrepância na fatura anterior",
+    "body": "Fatura mostra R$ 189,90 mas o plano é R$ 119,90.",
     "status": "in_progress",
     "priority": "medium",
     "category": "billing",
@@ -99,7 +99,7 @@ export const MOCK_TICKETS: Ticket[] = [
     "aiTriage": {
       "urgency": 2,
       "category": "billing",
-      "suggestedResponse": "Extra R$ 70,00 is a one-time equipment fee.",
+      "suggestedResponse": "Valor extra de R$ 70,00 é taxa única de equipamento.",
       "provider": "claude",
       "model": "claude-sonnet-4-20250514",
       "confidence": 0.88,
@@ -108,8 +108,8 @@ export const MOCK_TICKETS: Ticket[] = [
   },
   {
     "id": "t3",
-    "subject": "Speeds dropped to 10 Mbps",
-    "body": "Paying for 300 Mbps but getting 10-15 Mbps for 3 days.",
+    "subject": "Velocidade caiu para 10 Mbps",
+    "body": "Pagando por 300 Mbps mas recebendo 10-15 Mbps há 3 dias.",
     "status": "open",
     "priority": "high",
     "category": "speed",
@@ -120,7 +120,7 @@ export const MOCK_TICKETS: Ticket[] = [
     "aiTriage": {
       "urgency": 4,
       "category": "speed",
-      "suggestedResponse": "Technician will visit within 24h to test ONT.",
+      "suggestedResponse": "Técnico visitará em até 24h para testar a ONT.",
       "provider": "claude",
       "model": "claude-sonnet-4-20250514",
       "confidence": 0.91,
@@ -129,8 +129,8 @@ export const MOCK_TICKETS: Ticket[] = [
   },
   {
     "id": "t4",
-    "subject": "Wi-Fi 6 router keeps disconnecting",
-    "body": "Router disconnects all devices every 2-3 hours.",
+    "subject": "Roteador Wi-Fi 6 desconecta constantemente",
+    "body": "Roteador desconecta todos os dispositivos a cada 2-3 horas.",
     "status": "open",
     "priority": "medium",
     "category": "equipment",
@@ -141,7 +141,7 @@ export const MOCK_TICKETS: Ticket[] = [
     "aiTriage": {
       "urgency": 3,
       "category": "equipment",
-      "suggestedResponse": "Blinking amber indicates firmware update cycle.",
+      "suggestedResponse": "Pisca amarelo indica ciclo de atualização de firmware.",
       "provider": "openai",
       "model": "gpt-4o",
       "confidence": 0.85,
@@ -150,8 +150,8 @@ export const MOCK_TICKETS: Ticket[] = [
   },
   {
     "id": "t5",
-    "subject": "Request for plan upgrade",
-    "body": "Want to upgrade from Fibra Básico to Premium.",
+    "subject": "Solicitação de upgrade de plano",
+    "body": "Quero fazer upgrade de Fibra Básico para Premium.",
     "status": "in_progress",
     "priority": "low",
     "category": "other",
@@ -162,7 +162,7 @@ export const MOCK_TICKETS: Ticket[] = [
     "aiTriage": {
       "urgency": 1,
       "category": "other",
-      "suggestedResponse": "Account qualifies for Fibra Premium.",
+      "suggestedResponse": "Conta qualifica para Fibra Premium.",
       "provider": "claude",
       "model": "claude-sonnet-4-20250514",
       "confidence": 0.97,
@@ -171,8 +171,8 @@ export const MOCK_TICKETS: Ticket[] = [
   },
   {
     "id": "t6",
-    "subject": "No internet after moving apartments",
-    "body": "Moved from Centro to Centro. Need service transfer.",
+    "subject": "Sem internet após mudança de apartamento",
+    "body": "Mudei dentro do Centro. Preciso de transferência de serviço.",
     "status": "resolved",
     "priority": "medium",
     "category": "installation",
@@ -183,7 +183,7 @@ export const MOCK_TICKETS: Ticket[] = [
     "aiTriage": {
       "urgency": 2,
       "category": "installation",
-      "suggestedResponse": "Installation available tomorrow.",
+      "suggestedResponse": "Instalação disponível amanhã.",
       "provider": "openai",
       "model": "gpt-4o",
       "confidence": 0.92,
