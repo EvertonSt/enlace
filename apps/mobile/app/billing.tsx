@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, StyleSheet, useColorScheme, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRefresh } from '../src/hooks/useRefresh';
 import { useAuth } from '../src/lib/auth';
+import { useTheme } from '../src/lib/ThemeContext';
 import type { Invoice } from '@enlace/core';
 
 export default function BillingScreen() {
   const { t } = useTranslation();
-  const dark = useColorScheme() === 'dark';
+  const { isDark: dark } = useTheme();
   const c = s(dark);
   const { apiFetch } = useAuth();
   const { refreshing, onRefresh } = useRefresh();
@@ -41,8 +42,6 @@ export default function BillingScreen() {
 
   return (
     <ScrollView style={c.scroll} contentContainerStyle={c.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#7c3aed" colors={['#7c3aed']} />}>
-      <Text style={c.title}>{t('billing.title')}</Text>
-
       {loading ? (
         <View style={{ alignItems: 'center', paddingVertical: 40 }}>
           <ActivityIndicator size="large" color="#7c3aed" />

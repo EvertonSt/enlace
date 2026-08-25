@@ -49,6 +49,7 @@ async function saveStoredStatuses(statuses: Map<string, string>): Promise<void> 
 }
 
 import i18n from '../i18n';
+import { translateOutageTitle, translateOutageArea } from './outageText';
 
 function getStatusLabel(status: string): string {
   return i18n.t('outage.' + (status === 'fix_in_progress' ? 'fixInProgress' : status));
@@ -89,13 +90,13 @@ export async function checkAndNotify(outages: OutageEvent[]): Promise<number> {
 
       if (isNew) {
         title = `${icon} ${i18n.t('outage.newOutage')}`;
-        body = `${outage.title} — ${outage.affectedArea}`;
+        body = `${translateOutageTitle(outage.title, i18n)} — ${translateOutageArea(outage.affectedArea, i18n)}`;
         if (outage.affectedCustomerCount > 0) {
           body += ` (${outage.affectedCustomerCount.toLocaleString()} ${i18n.t('outage.affected')})`;
         }
       } else {
         title = `${icon} ${i18n.t('outage.updated')}`;
-        body = `${outage.title} → ${statusLabel}`;
+        body = `${translateOutageTitle(outage.title, i18n)} → ${statusLabel}`;
       }
 
       await Notifications.scheduleNotificationAsync({
@@ -136,4 +137,41 @@ export async function checkAndNotify(outages: OutageEvent[]): Promise<number> {
   await saveStoredStatuses(newStatuses);
 
   return notified;
+}
+
+/**
+ * Fires a single sample outage alert so the user can verify the
+ * notification pipeline (permission → channel → display) works.
+ * Returns true if the notification was scheduled, false if permission denied.
+ */
+export async function sendTestNotification(): Promise<boolean> {
+  const { status: current } = await Notifications.getPermissionsAsync();
+  let status = current;
+  if (status !== 'granted') {
+    const req = await Notifications.requestPermissionsAsync();
+    status = req.status;
+  }
+  if (status !== 'granted') return false;
+
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('outage-alerts', {
+      name: 'Outage Alerts',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#7c3aed',
+      sound: 'default',
+    });
+  }
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: `📡 ${i18n.t('outage.newOutage')}`,
+      body: i18n.t('settings.testNotificationBody'),
+      sound: true,
+      ...(Platform.OS === 'android' ? { channelId: 'outage-alerts' } : {}),
+    },
+    trigger: null,
+  });
+
+  return true;
 }

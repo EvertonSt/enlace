@@ -16,7 +16,12 @@
     "status": "Status",
     "confirm": "Confirm",
     "warning": "Warning",
-    "new": "NEW"
+    "new": "NEW",
+    "notAvailable": "Not available",
+    "demoData": "Demo data — sample information, not real usage.",
+    "guest": "Guest",
+    "unknown": "Unknown",
+    "send": "Send"
   },
   "auth": {
     "login": "Log In",
@@ -36,13 +41,29 @@
     "invalidEmail": "Invalid email address",
     "passwordRequired": "Password is required",
     "passwordMinLength": "Minimum 6 characters",
-    "confirmLogout": "Sign out?"
+    "confirmLogout": "Sign out?",
+    "biometricLogin": "Login with {{type}}",
+    "biometricSub": "Touch the sensor to authenticate",
+    "authenticating": "Authenticating…",
+    "orPassword": "or sign in with password",
+    "biometricFailed": "Biometric login failed",
+    "biometricExpired": "Stored credentials may be expired. Please log in with your password.",
+    "enableBiometricTitle": "Enable {{type}}?",
+    "enableBiometricBody": "Use {{type}} for faster login next time.",
+    "biometricEnabled": "{{type}} login has been enabled.",
+    "demoNote": "Demo build — sign in with your account email and password.",
+    "biometricType": {
+      "fingerprint": "Fingerprint",
+      "face": "Face",
+      "biometric": "Biometric"
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
     "outages": "Outages",
-    "tickets": "Support Tickets",
+    "tickets": "Tickets",
     "billing": "Billing",
+    "settings": "Settings",
     "speedTest": "Speed Test",
     "technicians": "Technicians",
     "nocDashboard": "NOC Dashboard",
@@ -86,7 +107,20 @@
     "eta": "ETA",
     "newOutage": "New Outage Reported",
     "updated": "Outage Updated",
-    "affected": "affected"
+    "affected": "affected",
+    "titles": {
+      "notifications_bng_router_crash": "Notifications; BNG router crash",
+      "fiber_cut": "Fiber cut",
+      "power_outage": "Power outage",
+      "dns_issue": "DNS issue",
+      "high_latency": "High latency",
+      "core_router_failure": "Core router failure"
+    },
+    "areas": {
+      "downtown": "Downtown",
+      "residential_zone": "Residential zone",
+      "business_district": "Business district"
+    }
   },
   "ticket": {
     "title": "Support Tickets",
@@ -176,6 +210,30 @@
     "label": "Language",
     "english": "English",
     "portuguese": "Português (BR)"
+  },
+  "settings": {
+    "account": "Account",
+    "appearance": "Appearance",
+    "security": "Security",
+    "storage": "Storage",
+    "cachedData": "Cached Data",
+    "cached": "cached",
+    "clear": "Clear",
+    "enabledTouch": "Enabled — touch to login",
+    "disabled": "Disabled",
+    "clearCacheTitle": "Clear Cache",
+    "clearCacheBody": "Remove all cached data? This will not log you out.",
+    "clearCacheDone": "Done",
+    "clearCacheDoneBody": "Cache cleared.",
+    "biometricLogin": "{{type}} Login",
+    "biometricDisabledTitle": "Disabled",
+    "biometricDisabledBody": "{{type}} login has been disabled.",
+    "credentialsNeededTitle": "Credentials needed",
+    "credentialsNeededBody": "Biometric login requires your email and password to be stored securely. Please log out and log in again - you will be prompted to enable biometrics.",
+    "testNotification": "Send test notification",
+    "testNotificationBody": "Outage alert: sample interruption in your area.",
+    "notifDenied": "Notifications are blocked. Enable them in Settings to receive outage alerts.",
+    "openSettings": "Open Settings"
   },
   "time": {
     "justNow": "just now",

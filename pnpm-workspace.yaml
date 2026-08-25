@@ -5,6 +5,8 @@ nodeLinker: hoisted
 overrides:
   expo-constants: ~17.0.0
   expo-linking: ~6.0.0
+  react: 19.0.0
+  react-dom: 19.0.0
 allowBuilds:
   '@prisma/engines': true
   esbuild: true

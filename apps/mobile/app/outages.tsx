@@ -1,39 +1,40 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, StyleSheet, useColorScheme, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRefresh } from '../src/hooks/useRefresh';
 import { useOutagePolling } from '../src/hooks/useOutagePolling';
 import { useAuth } from '../src/lib/auth';
+import { useTheme } from '../src/lib/ThemeContext';
+import { translateOutageTitle, translateOutageArea } from '../src/lib/outageText';
 
 const STATUS_COLORS: Record<string, string> = { fix_in_progress: '#3b82f6', investigating: '#ef4444', identified: '#f97316', reported: '#eab308', resolved: '#22c55e' };
 
-function getTimeAgo(date: Date): string {
+function getTimeAgo(date: Date, t: (key: string, opts?: any) => string): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (seconds < 10) return 'just now';
-  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 10) return t('time.justNow');
+  if (seconds < 60) return t('time.secondsAgo', { count: String(seconds) });
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t('time.minutesAgo', { count: String(minutes) });
   const hours = Math.floor(minutes / 60);
-  return `${hours}h ago`;
+  return t('time.hoursAgo', { count: String(hours) });
 }
 
 export default function OutagesScreen() {
   const { t } = useTranslation();
-  const dark = useColorScheme() === 'dark';
+  const { isDark: dark } = useTheme();
   const c = s(dark);
   const { apiFetch } = useAuth();
   const { refreshing, onRefresh } = useRefresh();
   const { outages, loading, lastUpdated, isPolling } = useOutagePolling(apiFetch, 20_000);
-  const timeAgo = lastUpdated ? getTimeAgo(lastUpdated) : '';
+  const timeAgo = lastUpdated ? getTimeAgo(lastUpdated, t) : '';
 
   return (
     <ScrollView style={c.scroll} contentContainerStyle={c.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#7c3aed" colors={['#7c3aed']} />}>
       <View style={c.titleRow}>
-        <Text style={c.title}>{t('outage.title')}</Text>
         {timeAgo && (
           <View style={c.liveIndicator}>
             <View style={[c.liveDot, isPolling && c.liveDotActive]} />
-            <Text style={c.liveText}>Live • {timeAgo}</Text>
+            <Text style={c.liveText}>{t('common.live')} • {timeAgo}</Text>
           </View>
         )}
       </View>
@@ -56,12 +57,12 @@ export default function OutagesScreen() {
         outages.map((o) => (
           <View key={o.id} style={c.card}>
             <View style={c.cardHeader}>
-              <Text style={c.cardTitle}>{o.title}</Text>
+              <Text style={c.cardTitle}>{translateOutageTitle(o.title, t)}</Text>
               <View style={[c.statusBadge, { backgroundColor: (STATUS_COLORS[o.status] ?? '#6b7280') + '20' }]}>
                 <Text style={[c.statusText, { color: STATUS_COLORS[o.status] ?? '#6b7280' }]}>{t('outage.' + (o.status === 'fix_in_progress' ? 'fixInProgress' : o.status))}</Text>
               </View>
             </View>
-            <Text style={c.cardSub}>{o.affectedArea} — {(o.affectedCustomerCount ?? 0).toLocaleString()} {t('outage.affectedCustomers', { count: '' }).trim()}</Text>
+            <Text style={c.cardSub}>{translateOutageArea(o.affectedArea, t)} — {(o.affectedCustomerCount ?? 0).toLocaleString()} {t('outage.affectedCustomers', { count: '' }).trim()}</Text>
             {o.description && <Text style={c.desc}>{o.description}</Text>}
             {o.estimatedResolution && <Text style={c.eta}>{t('outage.eta')}: {new Date(o.estimatedResolution).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</Text>}
           </View>
@@ -75,7 +76,7 @@ const s = (dark: boolean) => StyleSheet.create({
   scroll: { flex: 1, backgroundColor: dark ? '#0f172a' : '#f9fafb' },
   content: { padding: 16, paddingBottom: 32 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  title: { fontSize: 24, fontWeight: 'bold', color: dark ? '#f1f5f9' : '#111827' },
+  title: { fontSize: 24, fontWeight: 'bold', color: dark ? '#f1f5f9' : '#111827', flexShrink: 1 },
   liveIndicator: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: dark ? '#1e3a2a' : '#dcfce7', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#6b7280' },
   liveDotActive: { backgroundColor: '#22c55e' },

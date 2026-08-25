@@ -64,9 +64,14 @@ export function useNotifications(): NotificationState {
         });
       }
 
-      // Get push token (for future server-side push)
-      const tokenData = await Notifications.getExpoPushTokenAsync();
-      setState({ permission: 'granted', expoPushToken: tokenData.data });
+      // Get push token (for future server-side push). Non-fatal if it fails
+      // (e.g. no EAS project configured) — local notifications still work.
+      try {
+        const tokenData = await Notifications.getExpoPushTokenAsync();
+        setState({ permission: 'granted', expoPushToken: tokenData.data });
+      } catch {
+        setState({ permission: 'granted', expoPushToken: null });
+      }
     }
 
     void register();

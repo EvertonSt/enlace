@@ -16,7 +16,12 @@
     "status": "Status",
     "confirm": "Confirmar",
     "warning": "Atenção",
-    "new": "NOVO"
+    "new": "NOVO",
+    "notAvailable": "Indisponível",
+    "demoData": "Dados de demonstração — informações de exemplo, não são uso real.",
+    "guest": "Visitante",
+    "unknown": "Desconhecido",
+    "send": "Enviar"
   },
   "auth": {
     "login": "Entrar",
@@ -36,13 +41,29 @@
     "invalidEmail": "Endereço de e-mail inválido",
     "passwordRequired": "Senha é obrigatória",
     "passwordMinLength": "Mínimo de 6 caracteres",
-    "confirmLogout": "Sair?"
+    "confirmLogout": "Sair?",
+    "biometricLogin": "Login por {{type}}",
+    "biometricSub": "Toque no sensor para autenticar",
+    "authenticating": "Autenticando…",
+    "orPassword": "ou entre com a senha",
+    "biometricFailed": "Falha na autenticação biométrica",
+    "biometricExpired": "As credenciais salvas podem estar expiradas. Faça login com sua senha.",
+    "enableBiometricTitle": "Ativar {{type}}?",
+    "enableBiometricBody": "Use {{type}} para entrar mais rápido na próxima vez.",
+    "biometricEnabled": "Login {{type}} foi ativado.",
+    "demoNote": "Build de demonstração — entre com seu e-mail e senha da conta.",
+    "biometricType": {
+      "fingerprint": "Impressão Digital",
+      "face": "Face",
+      "biometric": "Biometria"
+    }
   },
   "nav": {
     "dashboard": "Painel",
-    "outages": "Interrupções",
+    "outages": "Mapa",
     "tickets": "Chamados",
-    "billing": "Faturamento",
+    "billing": "Fatura",
+    "settings": "Ajustes",
     "speedTest": "Teste de Velocidade",
     "technicians": "Técnicos",
     "nocDashboard": "Painel NOC",
@@ -86,7 +107,20 @@
     "eta": "Previsão",
     "newOutage": "Nova Interrupção Reportada",
     "updated": "Interrupção Atualizada",
-    "affected": "afetados"
+    "affected": "afetados",
+    "titles": {
+      "notifications_bng_router_crash": "Notificações; Queda do roteador BNG",
+      "fiber_cut": "Corte de fibra",
+      "power_outage": "Falha de energia",
+      "dns_issue": "Problema de DNS",
+      "high_latency": "Alta latência",
+      "core_router_failure": "Falha do roteador central"
+    },
+    "areas": {
+      "downtown": "Centro",
+      "residential_zone": "Zona residencial",
+      "business_district": "Distrito comercial"
+    }
   },
   "ticket": {
     "title": "Chamados de Suporte",
@@ -176,6 +210,30 @@
     "label": "Idioma",
     "english": "English",
     "portuguese": "Português (BR)"
+  },
+  "settings": {
+    "account": "Conta",
+    "appearance": "Aparência",
+    "security": "Segurança",
+    "storage": "Armazenamento",
+    "cachedData": "Dados em Cache",
+    "cached": "em cache",
+    "clear": "Limpar",
+    "enabledTouch": "Ativado — toque para entrar",
+    "disabled": "Desativado",
+    "clearCacheTitle": "Limpar Cache",
+    "clearCacheBody": "Remover todos os dados em cache? Isso não fará logout.",
+    "clearCacheDone": "Pronto",
+    "clearCacheDoneBody": "Cache limpo.",
+    "biometricLogin": "Login por {{type}}",
+    "biometricDisabledTitle": "Desativado",
+    "biometricDisabledBody": "Login {{type}} foi desativado.",
+    "credentialsNeededTitle": "Credenciais necessárias",
+    "credentialsNeededBody": "O login biométrico requer que seu e-mail e senha sejam armazenados com segurança. Faça logout e login novamente - você será solicitado a ativar a biometria.",
+    "testNotification": "Enviar notificação de teste",
+    "testNotificationBody": "Alerta de interrupção: exemplo de falha na sua área.",
+    "notifDenied": "Notificações estão bloqueadas. Habilite nas Configurações para receber alertas.",
+    "openSettings": "Abrir Configurações"
   },
   "time": {
     "justNow": "agora",

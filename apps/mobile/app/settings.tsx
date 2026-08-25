@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, useColorScheme } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,31 +7,31 @@ import { useAuth } from '../src/lib/auth';
 import { useTheme, type ThemePreference } from '../src/lib/ThemeContext';
 import { useBiometrics } from '../src/hooks/useBiometrics';
 import { clearCache } from '../src/lib/cache';
+import { sendTestNotification } from '../src/lib/notifications';
 
-const THEME_OPTIONS: { value: ThemePreference; label: string; icon: string }[] = [
-  { value: 'system', label: 'System', icon: '📱' },
-  { value: 'light', label: 'Light', icon: '☀️' },
-  { value: 'dark', label: 'Dark', icon: '🌙' },
+const THEME_OPTIONS: { value: ThemePreference; labelKey: string; icon: string }[] = [
+  { value: 'system', labelKey: 'themeToggle.system', icon: '📱' },
+  { value: 'light', labelKey: 'themeToggle.light', icon: '☀️' },
+  { value: 'dark', labelKey: 'themeToggle.dark', icon: '🌙' },
 ];
 
-const LANG_OPTIONS: { value: string; label: string; flag: string }[] = [
-  { value: 'en', label: 'English', flag: '🇺🇸' },
-  { value: 'pt-BR', label: 'Português (BR)', flag: '🇧🇷' },
+const LANG_OPTIONS: { value: string; labelKey: string; flag: string }[] = [
+  { value: 'en', labelKey: 'languageToggle.english', flag: '🇺🇸' },
+  { value: 'pt-BR', labelKey: 'languageToggle.portuguese', flag: '🇧🇷' },
 ];
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const dark = useColorScheme() === 'dark';
-  const { user, logout, hasBiometricCredentials, storeCredentials, clearStoredCredentials } = useAuth();
-  const { preference, setPreference } = useTheme();
-  const { isAvailable, biometricType, isEnabled: biometricEnabled, authenticate, setEnabled: setBiometricEnabled } = useBiometrics();
+  const { preference, setPreference, isDark: dark } = useTheme();
+  const { user, logout, clearStoredCredentials } = useAuth();
+  const { isAvailable, biometricType, isEnabled: biometricEnabled, setEnabled: setBiometricEnabled } = useBiometrics();
   const [cacheSize, setCacheSize] = useState('Calculating...');
   const c = s(dark);
 
   const biometricLabel = biometricType
-    ? biometricType.charAt(0).toUpperCase() + biometricType.slice(1)
-    : 'Biometric';
+    ? t('auth.biometricType.' + biometricType)
+    : t('auth.biometricType.biometric');
 
   // Calculate cache size
   const loadCacheSize = useCallback(async () => {
@@ -51,7 +51,7 @@ export default function SettingsScreen() {
       else if (totalBytes < 1024 * 1024) setCacheSize(`${(totalBytes / 1024).toFixed(1)} KB`);
       else setCacheSize(`${(totalBytes / (1024 * 1024)).toFixed(1)} MB`);
     } catch {
-      setCacheSize('Unknown');
+      setCacheSize(t('common.unknown'));
     }
   }, []);
 
@@ -60,10 +60,10 @@ export default function SettingsScreen() {
   }, [loadCacheSize]);
 
   async function handleClearCache() {
-    Alert.alert('Clear Cache', 'Remove all cached data? This will not log you out.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('settings.clearCacheTitle'), t('settings.clearCacheBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Clear',
+        text: t('settings.clear'),
         style: 'destructive',
         onPress: async () => {
           await clearCache();
@@ -72,10 +72,20 @@ export default function SettingsScreen() {
           const stateKeys = keys.filter((k) => k.startsWith('enlace-seen-') || k.startsWith('enlace-outage-'));
           if (stateKeys.length > 0) await AsyncStorage.multiRemove(stateKeys);
           setCacheSize('Empty');
-          Alert.alert('Done', 'Cache cleared.');
+          Alert.alert(t('settings.clearCacheDone'), t('settings.clearCacheDoneBody'));
         },
       },
     ]);
+  }
+
+  async function handleTestNotification() {
+    const ok = await sendTestNotification();
+    if (!ok) {
+      Alert.alert(t('settings.notifDenied'), t('settings.openSettings'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('settings.openSettings'), onPress: () => Linking.openSettings() },
+      ]);
+    }
   }
 
   async function handleLanguageChange(lang: string) {
@@ -84,29 +94,23 @@ export default function SettingsScreen() {
 
   async function handleBiometricToggle() {
     if (biometricEnabled) {
+      // Disable: clear the pref flag AND the stored credentials
+      await setBiometricEnabled(false);
       await clearStoredCredentials();
-      Alert.alert('Disabled', `${biometricLabel} login has been disabled.`);
+      Alert.alert(t('settings.biometricDisabledTitle'), t('settings.biometricDisabledBody', { type: biometricLabel }));
     } else {
-      const success = await authenticate();
-      if (success && user) {
-        // We need stored credentials — if we don't have them, we can't enable
-        if (hasBiometricCredentials) {
-          await setBiometricEnabled(true);
-        } else {
-          Alert.alert(
-            'Credentials needed',
-            'Biometric login requires your email and password to be stored securely. Please log out and log in again - you will be prompted to enable biometrics.',
-          );
-        }
-      }
+      // Authenticates once (inside setEnabled), then enables the pref flag.
+      // Credentials are already stored from login.
+      const ok = await setBiometricEnabled(true);
+      if (ok) Alert.alert(t('auth.biometricEnabled', { type: biometricLabel }));
     }
   }
 
   function handleLogout() {
-    Alert.alert('Logout', `Sign out${user?.name ? ` (${user.name})` : ''}?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('auth.logout'), `Sign out${user?.name ? ` (${user.name})` : ''}?`, [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Logout',
+        text: t('auth.logout'),
         style: 'destructive',
         onPress: () => {
           logout();
@@ -118,19 +122,16 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={c.scroll} contentContainerStyle={c.content}>
-      <Text style={c.title}>{t('common.settings')}</Text>
-
-      {/* Account */}
       <View style={c.section}>
-        <Text style={c.sectionTitle}>Account</Text>
+        <Text style={c.sectionTitle}>{t('settings.account')}</Text>
         <View style={c.card}>
           <View style={c.accountRow}>
             <View style={c.avatar}>
               <Text style={c.avatarText}>{user?.name?.charAt(0)?.toUpperCase() ?? '?'}</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={c.accountName}>{user?.name ?? 'Unknown'}</Text>
-              <Text style={c.accountEmail}>{user?.email ?? ''}</Text>
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <Text style={c.accountName}>{user?.name ?? t('common.guest')}</Text>
+              {user?.email ? <Text style={c.accountEmail}>{user.email}</Text> : null}
             </View>
           </View>
         </View>
@@ -138,14 +139,14 @@ export default function SettingsScreen() {
 
       {/* Theme */}
       <View style={c.section}>
-        <Text style={c.sectionTitle}>Appearance</Text>
+        <Text style={c.sectionTitle}>{t('settings.appearance')}</Text>
         <View style={c.card}>
           <Text style={c.label}>{t('themeToggle.label')}</Text>
           <View style={c.optionRow}>
             {THEME_OPTIONS.map((opt) => (
               <TouchableOpacity key={opt.value} style={[c.optionBtn, preference === opt.value && c.optionBtnActive]} onPress={() => setPreference(opt.value)}>
                 <Text style={c.optionIcon}>{opt.icon}</Text>
-                <Text style={[c.optionText, preference === opt.value && c.optionTextActive]}>{opt.label}</Text>
+                <Text style={[c.optionText, preference === opt.value && c.optionTextActive]}>{t(opt.labelKey)}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -160,7 +161,7 @@ export default function SettingsScreen() {
             {LANG_OPTIONS.map((opt) => (
               <TouchableOpacity key={opt.value} style={[c.optionBtn, i18n.language === opt.value && c.optionBtnActive]} onPress={() => handleLanguageChange(opt.value)}>
                 <Text style={c.optionIcon}>{opt.flag}</Text>
-                <Text style={[c.optionText, i18n.language === opt.value && c.optionTextActive]}>{opt.label}</Text>
+                <Text style={[c.optionText, i18n.language === opt.value && c.optionTextActive]}>{t(opt.labelKey)}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -170,17 +171,30 @@ export default function SettingsScreen() {
       {/* Security */}
       {isAvailable && (
         <View style={c.section}>
-          <Text style={c.sectionTitle}>Security</Text>
+          <Text style={c.sectionTitle}>{t('settings.security')}</Text>
           <View style={c.card}>
             <View style={c.settingRow}>
               <View style={{ flex: 1 }}>
-                <Text style={c.settingLabel}>{biometricIcon()} {biometricLabel} Login</Text>
+                <Text style={c.settingLabel}>{biometricIcon()} {t('settings.biometricLogin', { type: biometricLabel })}</Text>
                 <Text style={c.settingDesc}>
-                  {biometricEnabled ? 'Enabled — touch to login' : 'Disabled'}
+                  {biometricEnabled ? t('settings.enabledTouch') : t('settings.disabled')}
                 </Text>
               </View>
               <TouchableOpacity style={[c.toggle, biometricEnabled && c.toggleActive]} onPress={handleBiometricToggle}>
                 <View style={[c.toggleDot, biometricEnabled && c.toggleDotActive]} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Test notification */}
+          <View style={c.card}>
+            <View style={c.settingRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={c.settingLabel}>🔔 {t('settings.testNotification')}</Text>
+                <Text style={c.settingDesc}>{t('settings.notifDenied')}</Text>
+              </View>
+              <TouchableOpacity style={c.clearBtn} onPress={handleTestNotification}>
+                <Text style={c.clearBtnText}>{t('common.send')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -189,15 +203,15 @@ export default function SettingsScreen() {
 
       {/* Cache */}
       <View style={c.section}>
-        <Text style={c.sectionTitle}>Storage</Text>
+        <Text style={c.sectionTitle}>{t('settings.storage')}</Text>
         <View style={c.card}>
           <View style={c.settingRow}>
             <View style={{ flex: 1 }}>
-              <Text style={c.settingLabel}>Cached Data</Text>
-              <Text style={c.settingDesc}>{cacheSize} cached</Text>
+              <Text style={c.settingLabel}>{t('settings.cachedData')}</Text>
+              <Text style={c.settingDesc}>{cacheSize} {t('settings.cached')}</Text>
             </View>
             <TouchableOpacity style={c.clearBtn} onPress={handleClearCache}>
-              <Text style={c.clearBtnText}>Clear</Text>
+              <Text style={c.clearBtnText}>{t('settings.clear')}</Text>
             </TouchableOpacity>
           </View>
         </View>

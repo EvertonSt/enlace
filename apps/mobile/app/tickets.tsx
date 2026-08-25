@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, TextInput, TouchableOpacity, StyleSheet, Alert, useColorScheme, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRefresh } from '../src/hooks/useRefresh';
 import { useAuth } from '../src/lib/auth';
+import { useTheme } from '../src/lib/ThemeContext';
 import type { Ticket } from '@enlace/core';
 
 const URG_BG: Record<number, string> = { 1: '#dcfce7', 2: '#dbeafe', 3: '#fef9c3', 4: '#fed7aa', 5: '#fecaca' };
@@ -10,7 +11,7 @@ const URG_FG: Record<number, string> = { 1: '#166534', 2: '#1e40af', 3: '#854d0e
 
 export default function TicketsScreen() {
   const { t } = useTranslation();
-  const dark = useColorScheme() === 'dark';
+  const { isDark: dark } = useTheme();
   const c = s(dark);
   const { apiFetch, user } = useAuth();
   const [showForm, setShowForm] = useState(false);
@@ -70,7 +71,6 @@ export default function TicketsScreen() {
   return (
     <ScrollView style={c.scroll} contentContainerStyle={c.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#7c3aed" colors={['#7c3aed']} />}>
       <View style={c.header}>
-        <Text style={c.title}>{t('ticket.title')}</Text>
         <TouchableOpacity style={c.addBtn} onPress={() => setShowForm(!showForm)}>
           <Text style={c.addBtnText}>+ {t('ticket.newTicket')}</Text>
         </TouchableOpacity>
@@ -133,7 +133,7 @@ const s = (dark: boolean) => StyleSheet.create({
   scroll: { flex: 1, backgroundColor: dark ? '#0f172a' : '#f9fafb' },
   content: { padding: 16, paddingBottom: 32 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', color: dark ? '#f1f5f9' : '#111827' },
+  title: { fontSize: 24, fontWeight: 'bold', color: dark ? '#f1f5f9' : '#111827', flex: 1, flexShrink: 1, marginRight: 8 },
   addBtn: { backgroundColor: '#7c3aed', borderRadius: 10, paddingHorizontal: 16, paddingVertical: 8 },
   addBtnText: { color: '#fff', fontSize: 13, fontWeight: '600' },
   form: { backgroundColor: dark ? '#1e293b' : '#fff', borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: dark ? '#334155' : '#e5e7eb' },

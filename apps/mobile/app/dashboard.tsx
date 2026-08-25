@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Alert, StyleSheet, useColorScheme, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRefresh } from '../src/hooks/useRefresh';
 import { useOutagePolling } from '../src/hooks/useOutagePolling';
 import { useAuth } from '../src/lib/auth';
+import { useTheme } from '../src/lib/ThemeContext';
+import { translateOutageTitle, translateOutageArea } from '../src/lib/outageText';
 import type { Invoice, Ticket } from '@enlace/core';
 
 interface PlanInfo {
@@ -15,7 +17,7 @@ interface PlanInfo {
 
 export default function DashboardScreen() {
   const { t } = useTranslation();
-  const dark = useColorScheme() === 'dark';
+  const { isDark: dark } = useTheme();
   const c = s(dark);
   const { apiFetch, customer, user, logout } = useAuth();
   const { refreshing, onRefresh } = useRefresh();
@@ -83,7 +85,6 @@ export default function DashboardScreen() {
     <ScrollView style={c.scroll} contentContainerStyle={c.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#7c3aed" colors={['#7c3aed']} />}>
       <View style={c.headerRow}>
         <View style={{ flex: 1 }}>
-          <Text style={c.title}>{t('dashboard.title')}</Text>
           {user && <Text style={c.greeting}>{t('dashboard.greeting', { name: user.name?.split(' ')[0] ?? '' })} 👋</Text>}
         </View>
         <TouchableOpacity onPress={handleLogout} style={c.logoutBtn}>
@@ -94,25 +95,24 @@ export default function DashboardScreen() {
       {/* Plan */}
       <View style={c.card}>
         <Text style={c.label}>{t('dashboard.currentPlan')}</Text>
-        <Text style={c.value}>{plan?.name ?? 'N/A'}</Text>
+        <Text style={c.value}>{plan?.name ?? t('common.notAvailable')}</Text>
         <Text style={c.sub}>{plan ? `${plan.speedMbps} Mbps — ${t('dashboard.planDetails.unlimited')}` : ''}</Text>
-        {plan && <Text style={c.price}>{t('dashboard.price', { price: plan.price.toFixed(2).replace('.', ',') })}</Text>}
+        {plan && <Text style={c.price}>{t('dashboard.price', { price: Number(plan.price ?? 0).toFixed(2).replace('.', ',') })}</Text>}
       </View>
 
-      {/* Data Usage */}
+      {/* Recent Tickets (was mislabeled "Data Usage") */}
       <View style={c.card}>
-        <Text style={c.label}>{t('dashboard.dataUsage')}</Text>
-        <Text style={c.value}>{tickets.length} {t('ticket.ticketCount', { count: '' }).trim()}</Text>
+        <Text style={c.label}>{t('dashboard.recentTickets')}</Text>
+        <Text style={c.value}>{tickets.length}</Text>
         <Text style={c.sub}>{t('dashboard.dataUsageCycle')}</Text>
-        <View style={c.barBg}><View style={[c.barFill, { width: `${Math.min(tickets.length * 20, 100)}%` }]} /></View>
       </View>
 
       {/* Next Bill */}
       {nextInvoice && (
         <View style={c.card}>
           <Text style={c.label}>{t('dashboard.nextBill')}</Text>
-          <Text style={c.value}>R$ {(nextInvoice.amount / 100).toFixed(2).replace('.', ',')}</Text>
-          <Text style={c.sub}>{t('dashboard.dueOn', { date: new Date(nextInvoice.dueDate).toLocaleDateString('pt-BR') })}</Text>
+          <Text style={c.value}>R$ {(Number(nextInvoice.amount ?? 0) / 100).toFixed(2).replace('.', ',')}</Text>
+          <Text style={c.sub}>{t('dashboard.dueOn', { date: nextInvoice.dueDate ? new Date(nextInvoice.dueDate).toLocaleDateString('pt-BR') : t('common.notAvailable') })}</Text>
           <View style={c.badge}><Text style={c.badgeText}>{t('billing.status.' + nextInvoice.status)}</Text></View>
         </View>
       )}
@@ -139,8 +139,8 @@ export default function DashboardScreen() {
                 {o.status === 'fix_in_progress' ? '🔧' : o.status === 'investigating' ? '🔍' : '📡'}
               </Text>
               <View style={{ flex: 1 }}>
-                <Text style={c.outageTitle}>{o.title}</Text>
-                <Text style={c.outageSub}>{o.affectedArea} — {o.affectedCustomerCount.toLocaleString()} {t('outage.affectedCustomers', { count: '' }).trim()}</Text>
+                <Text style={c.outageTitle}>{translateOutageTitle(o.title, t)}</Text>
+                <Text style={c.outageSub}>{translateOutageArea(o.affectedArea, t)} — {(o.affectedCustomerCount ?? 0).toLocaleString()} {t('outage.affectedCustomers', { count: '' }).trim()}</Text>
               </View>
               <View style={[c.statusBadge, { backgroundColor: (STATUS_COLORS[o.status] ?? '#6b7280') + '20' }]}>
                 <Text style={[c.statusText, { color: STATUS_COLORS[o.status] ?? '#6b7280' }]}>{t('outage.' + (o.status === 'fix_in_progress' ? 'fixInProgress' : o.status))}</Text>
@@ -149,6 +149,8 @@ export default function DashboardScreen() {
           ))
         )}
       </View>
+
+      <Text style={c.disclaimer}>{t('common.demoData')}</Text>
     </ScrollView>
   );
 }
@@ -169,7 +171,7 @@ const s = (dark: boolean) => StyleSheet.create({
   scroll: { flex: 1, backgroundColor: dark ? '#0f172a' : '#f9fafb' },
   content: { padding: 16, paddingBottom: 32 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', color: dark ? '#f1f5f9' : '#111827' },
+  title: { fontSize: 24, fontWeight: 'bold', color: dark ? '#f1f5f9' : '#111827', flexShrink: 1 },
   greeting: { fontSize: 14, color: dark ? '#94a3b8' : '#6b7280', marginTop: 2 },
   logoutBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, backgroundColor: dark ? '#451a1a' : '#fef2f2', marginTop: 4 },
   logoutText: { fontSize: 13, fontWeight: '600', color: '#ef4444' },
@@ -192,4 +194,5 @@ const s = (dark: boolean) => StyleSheet.create({
   outageSub: { fontSize: 12, color: dark ? '#94a3b8' : '#6b7280', marginTop: 2 },
   statusBadge: { borderRadius: 12, paddingHorizontal: 8, paddingVertical: 3 },
   statusText: { fontSize: 11, fontWeight: '600' },
+  disclaimer: { fontSize: 11, color: dark ? '#64748b' : '#9ca3af', textAlign: 'center', marginTop: 16, paddingHorizontal: 8 },
 });

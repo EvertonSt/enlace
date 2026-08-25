@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet, useColorScheme, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
+import { useTheme } from '../lib/ThemeContext';
 
 interface AnimatedSplashProps {
   onAnimationComplete: () => void;
 }
 
 export function AnimatedSplash({ onAnimationComplete }: AnimatedSplashProps) {
-  const dark = useColorScheme() === 'dark';
+  const { isDark: dark } = useTheme();
   const logoScale = useRef(new Animated.Value(0.8)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const globeRotate = useRef(new Animated.Value(0)).current;

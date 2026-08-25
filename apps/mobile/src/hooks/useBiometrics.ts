@@ -27,7 +27,7 @@ interface BiometricsState {
  */
 export function useBiometrics(): BiometricsState & {
   authenticate: () => Promise<boolean>;
-  setEnabled: (enabled: boolean) => Promise<void>;
+  setEnabled: (enabled: boolean) => Promise<boolean>;
 } {
   const [state, setState] = useState<BiometricsState>({
     isAvailable: false,
@@ -90,15 +90,16 @@ export function useBiometrics(): BiometricsState & {
   /**
    * Toggle biometric preference. If enabling, verifies biometrics work first.
    */
-  const setEnabled = useCallback(async (enabled: boolean) => {
+  const setEnabled = useCallback(async (enabled: boolean): Promise<boolean> => {
     if (enabled) {
-      // Verify biometrics work before enabling
+      // Verify biometrics work before enabling (single prompt)
       const success = await authenticate();
-      if (!success) return;
+      if (!success) return false;
     }
 
     await SecureStore.setItemAsync(BIOMETRIC_ENABLED_KEY, enabled ? 'true' : 'false');
     setState((prev) => ({ ...prev, isEnabled: enabled }));
+    return true;
   }, [authenticate]);
 
   return { ...state, authenticate, setEnabled };

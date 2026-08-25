@@ -95,6 +95,7 @@ function AppTabs() {
       screenOptions={{
         tabBarActiveTintColor: '#7c3aed',
         tabBarInactiveTintColor: isDark ? '#64748b' : '#9ca3af',
+        tabBarLabelStyle: { fontSize: 10, numberOfLines: 2, marginBottom: 2 },
         tabBarStyle: {
           backgroundColor: isDark ? '#0f172a' : '#ffffff',
           borderTopColor: isDark ? '#1e293b' : '#e5e7eb',
@@ -119,6 +120,7 @@ function AppTabs() {
         name="dashboard"
         options={{
           title: t('dashboard.title'),
+          tabBarLabel: t('nav.dashboard'),
           tabBarIcon: ({ size }) => <TabIcon emoji="🏠" size={size} />,
         }}
         listeners={{ focus: triggerHaptic }}
@@ -127,6 +129,7 @@ function AppTabs() {
         name="outages"
         options={{
           title: t('outage.title'),
+          tabBarLabel: t('nav.outages'),
           tabBarIcon: ({ size }) => <TabIcon emoji="📡" size={size} />,
         }}
         listeners={{ focus: triggerHaptic }}
@@ -135,6 +138,7 @@ function AppTabs() {
         name="tickets"
         options={{
           title: t('ticket.title'),
+          tabBarLabel: t('nav.tickets'),
           tabBarIcon: ({ size }) => <TabIcon emoji="🎫" size={size} />,
         }}
         listeners={{ focus: triggerHaptic }}
@@ -143,6 +147,7 @@ function AppTabs() {
         name="billing"
         options={{
           title: t('billing.title'),
+          tabBarLabel: t('nav.billing'),
           tabBarIcon: ({ size }) => <TabIcon emoji="💳" size={size} />,
         }}
         listeners={{ focus: triggerHaptic }}
@@ -151,6 +156,7 @@ function AppTabs() {
         name="settings"
         options={{
           title: t('common.settings'),
+          tabBarLabel: t('nav.settings'),
           tabBarIcon: ({ size }) => <TabIcon emoji="⚙️" size={size} />,
         }}
         listeners={{ focus: triggerHaptic }}
