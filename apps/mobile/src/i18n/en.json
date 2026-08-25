@@ -90,7 +90,7 @@
     "resolvedIncidents": "Resolved ({{count}})",
     "viewAll": "View All",
     "greeting": "Hello, {{name}}",
-    "price": "R$ {{price}}/mo"
+    "price": "{{price}}/mo"
   },
   "outage": {
     "title": "Outage Map",
@@ -108,8 +108,9 @@
     "newOutage": "New Outage Reported",
     "updated": "Outage Updated",
     "affected": "affected",
+    "apiDataNote": "Note: Incident content simulated from API data. System UI fully localized.",
     "titles": {
-      "notifications_bng_router_crash": "Notifications; BNG router crash",
+      "bng_router_crash": "BNG router crash",
       "fiber_cut": "Fiber cut",
       "power_outage": "Power outage",
       "dns_issue": "DNS issue",

@@ -4,10 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { useRefresh } from '../src/hooks/useRefresh';
 import { useAuth } from '../src/lib/auth';
 import { useTheme } from '../src/lib/ThemeContext';
+import { formatBRL } from '../src/lib/currency';
 import type { Invoice } from '@enlace/core';
 
 export default function BillingScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isDark: dark } = useTheme();
   const c = s(dark);
   const { apiFetch } = useAuth();
@@ -57,8 +58,8 @@ export default function BillingScreen() {
               invoices.map((inv) => (
                 <View key={inv.id} style={c.row}>
                   <View style={{ flex: 1 }}>
-                    <Text style={c.amount}>R$ {(inv.amount / 100).toFixed(2).replace('.', ',')}</Text>
-                    <Text style={c.date}>{t('billing.dueDate')}: {new Date(inv.dueDate).toLocaleDateString('pt-BR')}</Text>
+                    <Text style={c.amount}>{formatBRL(inv.amount, i18n.language)}</Text>
+                    <Text style={c.date}>{t('billing.dueDate')}: {new Date(inv.dueDate).toLocaleDateString(i18n.language === 'pt-BR' ? 'pt-BR' : 'en-US')}</Text>
                   </View>
                   <View style={[c.badge, inv.status === 'paid' ? c.badgePaid : c.badgePending]}>
                     <Text style={[c.badgeText, inv.status === 'paid' ? c.badgeTextPaid : c.badgeTextPending]}>{t('billing.status.' + inv.status)}</Text>
@@ -74,12 +75,12 @@ export default function BillingScreen() {
               {invoices.filter((inv) => inv.status === 'pending').map((inv) => (
                 <View key={inv.id} style={c.lineItem}>
                   <Text style={c.lineDesc}>{inv.lineItems?.[0]?.description ?? 'Monthly service'}</Text>
-                  <Text style={c.lineAmt}>R$ {(inv.amount / 100).toFixed(2).replace('.', ',')}</Text>
+                  <Text style={c.lineAmt}>{formatBRL(inv.amount, i18n.language)}</Text>
                 </View>
               ))}
               <View style={c.totalRow}>
                 <Text style={c.totalLabel}>Total</Text>
-                <Text style={c.totalValue}>R$ {(pendingTotal / 100).toFixed(2).replace('.', ',')}</Text>
+                <Text style={c.totalValue}>{formatBRL(pendingTotal, i18n.language)}</Text>
               </View>
             </View>
           )}

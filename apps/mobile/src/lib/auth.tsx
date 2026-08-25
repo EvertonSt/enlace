@@ -119,7 +119,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await SecureStore.setItemAsync(USER_KEY, JSON.stringify(data.user));
       setToken(data.token);
       setUser(data.user);
-      setCustomer(data.customer);
+      // The login response's `customer` lacks the nested `plan` object.
+      // Fetch the full profile so plan (name/price/etc.) is available.
+      let fullCustomer = data.customer;
+      try {
+        const meRes = await fetch(`${API_URL}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${data.token}` },
+        });
+        if (meRes.ok) {
+          const me = await meRes.json();
+          if (me.customer) fullCustomer = me.customer;
+        }
+      } catch {
+        // Keep the login-response customer as fallback
+      }
+      setCustomer(fullCustomer);
       return {};
     } catch {
       return { error: 'Cannot reach server — login requires network' };

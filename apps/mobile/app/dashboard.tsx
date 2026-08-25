@@ -6,6 +6,7 @@ import { useOutagePolling } from '../src/hooks/useOutagePolling';
 import { useAuth } from '../src/lib/auth';
 import { useTheme } from '../src/lib/ThemeContext';
 import { translateOutageTitle, translateOutageArea } from '../src/lib/outageText';
+import { formatBRL } from '../src/lib/currency';
 import type { Invoice, Ticket } from '@enlace/core';
 
 interface PlanInfo {
@@ -16,7 +17,7 @@ interface PlanInfo {
 }
 
 export default function DashboardScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isDark: dark } = useTheme();
   const c = s(dark);
   const { apiFetch, customer, user, logout } = useAuth();
@@ -36,7 +37,10 @@ export default function DashboardScreen() {
         try {
           const invoices = await apiFetch<Invoice[]>(`/api/customers/${customer.id}/invoices`);
           if (invoices.length > 0) {
-            setNextInvoice(invoices[0] ?? null);
+            // "Next Bill" = the unpaid invoice (prefer pending over paid),
+            // else fall back to the most recent invoice.
+            const pending = invoices.find((inv) => inv.status !== 'paid');
+            setNextInvoice(pending ?? invoices[invoices.length - 1] ?? null);
           }
           if (customer.plan) {
             setPlan(customer.plan);
@@ -95,9 +99,9 @@ export default function DashboardScreen() {
       {/* Plan */}
       <View style={c.card}>
         <Text style={c.label}>{t('dashboard.currentPlan')}</Text>
-        <Text style={c.value}>{plan?.name ?? t('common.notAvailable')}</Text>
+        <Text style={c.value}>{plan?.name ?? customer?.plan?.name ?? t('common.notAvailable')}</Text>
         <Text style={c.sub}>{plan ? `${plan.speedMbps} Mbps — ${t('dashboard.planDetails.unlimited')}` : ''}</Text>
-        {plan && <Text style={c.price}>{t('dashboard.price', { price: Number(plan.price ?? 0).toFixed(2).replace('.', ',') })}</Text>}
+        {plan && <Text style={c.price}>{t('dashboard.price', { price: formatBRL(plan.price ?? 0, i18n.language) })}</Text>}
       </View>
 
       {/* Recent Tickets (was mislabeled "Data Usage") */}
@@ -111,8 +115,8 @@ export default function DashboardScreen() {
       {nextInvoice && (
         <View style={c.card}>
           <Text style={c.label}>{t('dashboard.nextBill')}</Text>
-          <Text style={c.value}>R$ {(Number(nextInvoice.amount ?? 0) / 100).toFixed(2).replace('.', ',')}</Text>
-          <Text style={c.sub}>{t('dashboard.dueOn', { date: nextInvoice.dueDate ? new Date(nextInvoice.dueDate).toLocaleDateString('pt-BR') : t('common.notAvailable') })}</Text>
+          <Text style={c.value}>{formatBRL(nextInvoice.amount ?? 0, i18n.language)}</Text>
+          <Text style={c.sub}>{t('dashboard.dueOn', { date: nextInvoice.dueDate ? new Date(nextInvoice.dueDate).toLocaleDateString(i18n.language === 'pt-BR' ? 'pt-BR' : 'en-US') : t('common.notAvailable') })}</Text>
           <View style={c.badge}><Text style={c.badgeText}>{t('billing.status.' + nextInvoice.status)}</Text></View>
         </View>
       )}
@@ -122,7 +126,7 @@ export default function DashboardScreen() {
         <View style={c.outageHeader}>
           <View style={{ flex: 1 }}>
             <Text style={c.label}>{t('dashboard.activeOutages')}</Text>
-            {timeAgo && <Text style={c.pollTime}>🟢 {t('common.live')} • {timeAgo}</Text>}
+            {timeAgo && <Text style={c.pollTime}>🟢 {t('outage.live')} • {timeAgo}</Text>}
           </View>
           {hasNewChanges && (
             <TouchableOpacity onPress={clearChanges} style={c.newBadge}>
@@ -139,8 +143,8 @@ export default function DashboardScreen() {
                 {o.status === 'fix_in_progress' ? '🔧' : o.status === 'investigating' ? '🔍' : '📡'}
               </Text>
               <View style={{ flex: 1 }}>
-                <Text style={c.outageTitle}>{translateOutageTitle(o.title, t)}</Text>
-                <Text style={c.outageSub}>{translateOutageArea(o.affectedArea, t)} — {(o.affectedCustomerCount ?? 0).toLocaleString()} {t('outage.affectedCustomers', { count: '' }).trim()}</Text>
+                <Text style={c.outageTitle}>{/* RAW USER DATA: outage.title — API-sourced, translated via slug map */}{translateOutageTitle(o.title, t)}</Text>
+                <Text style={c.outageSub}>{/* RAW USER DATA: outage.affectedArea — API-sourced, translated */}{translateOutageArea(o.affectedArea, t)} — {(o.affectedCustomerCount ?? 0).toLocaleString()} {t('outage.affectedCustomers', { count: '' }).trim()}</Text>
               </View>
               <View style={[c.statusBadge, { backgroundColor: (STATUS_COLORS[o.status] ?? '#6b7280') + '20' }]}>
                 <Text style={[c.statusText, { color: STATUS_COLORS[o.status] ?? '#6b7280' }]}>{t('outage.' + (o.status === 'fix_in_progress' ? 'fixInProgress' : o.status))}</Text>

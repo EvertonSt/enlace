@@ -90,7 +90,7 @@
     "resolvedIncidents": "Resolvidos ({{count}})",
     "viewAll": "Ver Todos",
     "greeting": "Olá, {{name}}",
-    "price": "R$ {{price}}/mês"
+    "price": "{{price}}/mês"
   },
   "outage": {
     "title": "Mapa de Interrupções",
@@ -108,8 +108,9 @@
     "newOutage": "Nova Interrupção Reportada",
     "updated": "Interrupção Atualizada",
     "affected": "afetados",
+    "apiDataNote": "Nota: Conteúdo dos incidentes simulado a partir de dados da API. Interface do sistema totalmente localizada.",
     "titles": {
-      "notifications_bng_router_crash": "Notificações; Queda do roteador BNG",
+      "bng_router_crash": "Queda do roteador BNG",
       "fiber_cut": "Corte de fibra",
       "power_outage": "Falha de energia",
       "dns_issue": "Problema de DNS",

@@ -10,7 +10,7 @@ const URG_BG: Record<number, string> = { 1: '#dcfce7', 2: '#dbeafe', 3: '#fef9c3
 const URG_FG: Record<number, string> = { 1: '#166534', 2: '#1e40af', 3: '#854d0e', 4: '#9a3412', 5: '#991b1b' };
 
 export default function TicketsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isDark: dark } = useTheme();
   const c = s(dark);
   const { apiFetch, user } = useAuth();
@@ -107,7 +107,7 @@ export default function TicketsScreen() {
           return (
             <View key={tk.id} style={c.card}>
               <View style={c.cardHeader}>
-                <Text style={c.subject} numberOfLines={1}>{tk.subject}</Text>
+                <Text style={c.subject} numberOfLines={1}>{/* RAW USER DATA: ticket.subject — customer-written, not translated */}{tk.subject}</Text>
                 {urgency && (
                   <View style={[c.urgBadge, { backgroundColor: URG_BG[urgency] ?? '#f3f4f6' }]}>
                     <Text style={[c.urgText, { color: URG_FG[urgency] ?? '#374151' }]}>⚡{urgency}/5</Text>
@@ -115,9 +115,9 @@ export default function TicketsScreen() {
                 )}
               </View>
               <View style={c.cardMeta}>
-                <Text style={c.metaText}>{t('ticket.category.' + tk.category)}</Text>
+                <Text style={c.metaText}>{/* SYSTEM UI: ticket.category — translated via i18n */}{t('ticket.category.' + tk.category)}</Text>
                 <Text style={c.metaText}>•</Text>
-                <Text style={c.metaText}>{new Date(tk.createdAt).toLocaleDateString('pt-BR')}</Text>
+                <Text style={c.metaText}>{new Date(tk.createdAt).toLocaleDateString(i18n.language === 'pt-BR' ? 'pt-BR' : 'en-US')}</Text>
                 <Text style={c.metaText}>•</Text>
                 <Text style={[c.statusText, { color: tk.status === 'open' ? '#22c55e' : tk.status === 'in_progress' ? '#3b82f6' : '#6b7280' }]}>{t('ticket.status.' + tk.status)}</Text>
               </View>

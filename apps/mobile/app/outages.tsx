@@ -20,7 +20,7 @@ function getTimeAgo(date: Date, t: (key: string, opts?: any) => string): string 
 }
 
 export default function OutagesScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isDark: dark } = useTheme();
   const c = s(dark);
   const { apiFetch } = useAuth();
@@ -34,7 +34,7 @@ export default function OutagesScreen() {
         {timeAgo && (
           <View style={c.liveIndicator}>
             <View style={[c.liveDot, isPolling && c.liveDotActive]} />
-            <Text style={c.liveText}>{t('common.live')} • {timeAgo}</Text>
+            <Text style={c.liveText}>{t('outage.live')} • {timeAgo}</Text>
           </View>
         )}
       </View>
@@ -57,16 +57,19 @@ export default function OutagesScreen() {
         outages.map((o) => (
           <View key={o.id} style={c.card}>
             <View style={c.cardHeader}>
-              <Text style={c.cardTitle}>{translateOutageTitle(o.title, t)}</Text>
+              <Text style={c.cardTitle}>{/* RAW USER DATA: outage.title — API-sourced, translated via slug map */}{translateOutageTitle(o.title, t)}</Text>
               <View style={[c.statusBadge, { backgroundColor: (STATUS_COLORS[o.status] ?? '#6b7280') + '20' }]}>
                 <Text style={[c.statusText, { color: STATUS_COLORS[o.status] ?? '#6b7280' }]}>{t('outage.' + (o.status === 'fix_in_progress' ? 'fixInProgress' : o.status))}</Text>
               </View>
             </View>
             <Text style={c.cardSub}>{translateOutageArea(o.affectedArea, t)} — {(o.affectedCustomerCount ?? 0).toLocaleString()} {t('outage.affectedCustomers', { count: '' }).trim()}</Text>
-            {o.description && <Text style={c.desc}>{o.description}</Text>}
-            {o.estimatedResolution && <Text style={c.eta}>{t('outage.eta')}: {new Date(o.estimatedResolution).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</Text>}
+            {o.description && <Text style={c.desc}>{/* RAW USER DATA: outage.description — operator-submitted, not translated */}{o.description}</Text>}
+            {o.estimatedResolution && <Text style={c.eta}>{t('outage.eta')}: {new Date(o.estimatedResolution).toLocaleTimeString(i18n.language === 'pt-BR' ? 'pt-BR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</Text>}
           </View>
         ))
+      )}
+      {!loading && outages.length > 0 && (
+        <Text style={c.apiNote}>{/* SYSTEM UI: outage.apiDataNote — translated via i18n */}{t('outage.apiDataNote')}</Text>
       )}
     </ScrollView>
   );
@@ -95,4 +98,5 @@ const s = (dark: boolean) => StyleSheet.create({
   eta: { fontSize: 12, color: '#3b82f6', marginTop: 4, fontWeight: '500' },
   emptyCard: { backgroundColor: dark ? '#1e293b' : '#fff', borderRadius: 12, padding: 32, alignItems: 'center', borderWidth: 1, borderColor: dark ? '#334155' : '#e5e7eb' },
   emptyText: { fontSize: 14, color: dark ? '#94a3b8' : '#6b7280' },
+  apiNote: { fontSize: 11, color: dark ? '#64748b' : '#9ca3af', marginTop: 14, paddingHorizontal: 4, fontStyle: 'italic' },
 });
